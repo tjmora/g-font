@@ -125,13 +125,13 @@ export function buildLink(): string {
     ) {
       href += ":ital@0;1";
     } else if (lr > 0 && li === 0) {
-      href += ":wght@" + collector[i].normWeights.map((w) => w + ";");
+      href += ":wght@" + collector[i].normWeights.reduce((acc: string, cur) => acc + cur + ";", "");
       href = href.slice(0, href.length - 1); // remove last semi-colon
     } else {
       href +=
         ":ital,wght@" +
-        collector[i].normWeights.map((w) => "0," + w + ";") +
-        collector[i].italWeights.map((w) => "1," + w + ";");
+        collector[i].normWeights.reduce((acc: string, cur) => acc + "0," + cur + ";", "") +
+        collector[i].italWeights.reduce((acc: string, cur) => acc + "1," + cur + ";", "");
       href = href.slice(0, href.length - 1); // remove last semi-colon
     }
     href += "&";

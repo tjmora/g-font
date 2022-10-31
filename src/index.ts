@@ -1,4 +1,29 @@
-const LINKTAG_ID = "load-gFont-pkg-linktag";
+const LINKTAG_ID = "tjmora-gFont-linktag";
+
+type FontStyleValueType = "normal" | "italic";
+
+type FontWeightValueType =
+  | "thin"
+  | "extra light"
+  | "light"
+  | "regular"
+  | "medium"
+  | "semi-bold"
+  | "bold"
+  | "extra bold"
+  | "black";
+
+const Weights: { [key: string]: number } = {
+  thin: 100,
+  "extra light": 200,
+  light: 300,
+  regular: 400,
+  medium: 500,
+  "semi-bold": 600,
+  bold: 700,
+  "extra bold": 800,
+  black: 900,
+};
 
 let collector: {
   name: string;
@@ -60,7 +85,7 @@ function attemptProvideLink(delay: number) {
 
 function collectFont(
   name: string,
-  style: "normal" | "italic",
+  style: FontStyleValueType,
   weight: number
 ): boolean {
   let l = collector.length,
@@ -154,8 +179,8 @@ export function buildLink(): string {
 export default function gFont(
   name: string,
   trail: string,
-  style: "normal" | "italic" = "normal",
-  weight: number = 400
+  styleParam1?: FontStyleValueType | FontWeightValueType | number,
+  styleParam2?: FontStyleValueType | FontWeightValueType | number
 ): {
   css: string;
   obj: {
@@ -164,6 +189,32 @@ export default function gFont(
     fontWeight: string;
   };
 } {
+  let fstyle: FontStyleValueType;
+  let fweight: number;
+  if (styleParam1 === undefined) {
+    fstyle = "normal";
+    fweight = 400;
+  } else if (styleParam2 === undefined) {
+    if (styleParam1 === "normal" || styleParam1 === "italic") {
+      fstyle = styleParam1;
+      fweight = 400;
+    } else {
+      fstyle = "normal";
+      if (typeof styleParam1 === "number") fweight = styleParam1;
+      else fweight = Weights[styleParam1];
+    }
+  } else {
+    if (styleParam1 === "normal" || styleParam1 === "italic") {
+      fstyle = styleParam1;
+      if (typeof styleParam2 === "number") fweight = styleParam2;
+      else fweight = Weights[styleParam2];
+    } else {
+      if (typeof styleParam1 === "number") fweight = styleParam1;
+      else fweight = Weights[styleParam1];
+      fstyle = styleParam2 as FontStyleValueType;
+    }
+  }
+
   const isServer = !(
     typeof window !== "undefined" &&
     window.document &&
@@ -174,7 +225,7 @@ export default function gFont(
     // true only in very first call to loadGFont
     insertLinkTag();
 
-  let collectorIsChanged = collectFont(name, style, weight);
+  let collectorIsChanged = collectFont(name, fstyle, fweight);
 
   if (!isServer && collectorIsChanged) {
     stylesheetIsLoading = true;
@@ -190,14 +241,14 @@ export default function gFont(
       "', " +
       trail +
       "; font-style: " +
-      style +
+      fstyle +
       "; font-weight: " +
-      weight +
+      fweight +
       ";",
     obj: {
       fontFamily: "'" + name + "', " + trail,
-      fontStyle: style,
-      fontWeight: weight + "",
+      fontStyle: fstyle,
+      fontWeight: fweight + "",
     },
   };
 }

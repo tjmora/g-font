@@ -136,6 +136,7 @@ export function buildLink(): string {
     }
     href += "&";
   }
+  href += "display=block";
   return href;
 }
 

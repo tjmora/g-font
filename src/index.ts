@@ -136,7 +136,6 @@ export function buildLink(): string {
     }
     href += "&";
   }
-  href += "display=swap";
   return href;
 }
 

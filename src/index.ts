@@ -2,7 +2,7 @@ const LINKTAG_ID = "tjmora-gFont-linktag";
 
 type FontStyleValueType = "normal" | "italic";
 
-type FontWeightValueType =
+type FontWeightSematicValueType =
   | "thin"
   | "extra light"
   | "light"
@@ -12,6 +12,15 @@ type FontWeightValueType =
   | "bold"
   | "extra bold"
   | "black";
+
+type FontWeightValueType = number | FontWeightSematicValueType;
+
+type OtherThan<T extends FontStyleValueType | FontWeightValueType> =
+  T extends FontStyleValueType
+    ? FontWeightValueType
+    : T extends FontWeightValueType
+    ? FontStyleValueType
+    : FontWeightValueType;
 
 const Weights: { [key: string]: number } = {
   thin: 100,
@@ -176,11 +185,11 @@ export function buildLink(): string {
   return href;
 }
 
-export default function gFont(
+export default function gFont<T extends FontStyleValueType | FontWeightValueType>(
   name: string,
   trail: string,
-  styleParam1?: FontStyleValueType | FontWeightValueType | number,
-  styleParam2?: FontStyleValueType | FontWeightValueType | number
+  styleParam1?: T,
+  styleParam2?: OtherThan<T>
 ): {
   css: string;
   obj: {

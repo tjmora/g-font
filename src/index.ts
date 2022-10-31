@@ -97,8 +97,8 @@ function attemptProvideLink(delay: number) {
 
 function collectFont(
   name: string,
-  weight: number,
-  style: "normal" | "italic"
+  style: "normal" | "italic",
+  weight: number
 ): boolean {
   let l = collector.length,
     s = -1,
@@ -143,8 +143,8 @@ function collectFont(
 export default function gFont(
   name: string,
   trail: string,
-  weight: number = 400,
-  style: "normal" | "italic" = "normal"
+  style: "normal" | "italic" = "normal",
+  weight: number = 400
 ): {
   css: string;
   obj: {
@@ -157,7 +157,7 @@ export default function gFont(
     // true only in very first call to loadGFont
     insertLinkTag();
 
-  let collectorIsChanged = collectFont(name, weight, style);
+  let collectorIsChanged = collectFont(name, style, weight);
 
   if (collectorIsChanged) {
     stylesheetIsLoading = true;

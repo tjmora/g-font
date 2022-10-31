@@ -2,7 +2,7 @@ const LINKTAG_ID = "load-gFont-pkg-linktag";
 
 let collector: {
   name: string;
-  regWeights: number[];
+  normWeights: number[];
   italWeights: number[];
 }[] = [];
 
@@ -35,44 +35,6 @@ function insertLinkTag() {
   } else {
     document.querySelector("head")!.appendChild(linkTag);
   }
-}
-
-function buildLink(): string {
-  let href = "https://fonts.googleapis.com/css2?";
-  let i = 0,
-    j = 0,
-    l = collector.length,
-    lr = 0,
-    li = 0;
-  for (; i < l; i++) {
-    lr = collector[i].regWeights.length;
-    li = collector[i].italWeights.length;
-    href += "family=" + collector[i].name.split(" ").join("+");
-    if (lr === 1 && collector[i].regWeights[0] === 400 && li === 0) {
-      // do nothing
-    } else if (lr === 0 && li === 1 && collector[i].italWeights[0] === 400) {
-      href += ":ital@1";
-    } else if (
-      lr === 1 &&
-      collector[i].regWeights[0] === 400 &&
-      li === 1 &&
-      collector[i].italWeights[0] === 400
-    ) {
-      href += ":ital@0;1";
-    } else if (lr > 0 && li === 0) {
-      href += ":wght@" + collector[i].regWeights.map((w) => w + ";");
-      href = href.slice(0, href.length - 1); // remove last semi-colon
-    } else {
-      href +=
-        ":ital,wght@" +
-        collector[i].regWeights.map((w) => "0," + w + ";") +
-        collector[i].italWeights.map((w) => "1," + w + ";");
-      href = href.slice(0, href.length - 1); // remove last semi-colon
-    }
-    href += "&";
-  }
-  href += "display=swap";
-  return href;
 }
 
 function attemptProvideLink(delay: number) {
@@ -116,9 +78,9 @@ function collectFont(
   if (s > -1) {
     // if font is already collected
     if (style === "normal") {
-      if (collector[s].regWeights.indexOf(weight) === -1) {
-        pos = findInsertionPoint(collector[s].regWeights, weight); /* sorted */
-        collector[s].regWeights.splice(pos, 0, weight); /* push   */
+      if (collector[s].normWeights.indexOf(weight) === -1) {
+        pos = findInsertionPoint(collector[s].normWeights, weight); /* sorted */
+        collector[s].normWeights.splice(pos, 0, weight); /* push   */
         collectorIsChanged = true;
       }
     } else if (style === "italic") {
@@ -132,13 +94,50 @@ function collectFont(
     // if font needs to be collected
     collector.push({
       name: name,
-      regWeights: style === "normal" ? [weight] : [],
+      normWeights: style === "normal" ? [weight] : [],
       italWeights: style === "italic" ? [weight] : [],
     });
     collectorIsChanged = true;
   }
 
   return collectorIsChanged;
+}
+
+export function buildLink(): string {
+  let href = "https://fonts.googleapis.com/css2?";
+  let i = 0,
+    l = collector.length,
+    lr = 0,
+    li = 0;
+  for (; i < l; i++) {
+    lr = collector[i].normWeights.length;
+    li = collector[i].italWeights.length;
+    href += "family=" + collector[i].name.split(" ").join("+");
+    if (lr === 1 && collector[i].normWeights[0] === 400 && li === 0) {
+      // do nothing
+    } else if (lr === 0 && li === 1 && collector[i].italWeights[0] === 400) {
+      href += ":ital@1";
+    } else if (
+      lr === 1 &&
+      collector[i].normWeights[0] === 400 &&
+      li === 1 &&
+      collector[i].italWeights[0] === 400
+    ) {
+      href += ":ital@0;1";
+    } else if (lr > 0 && li === 0) {
+      href += ":wght@" + collector[i].normWeights.map((w) => w + ";");
+      href = href.slice(0, href.length - 1); // remove last semi-colon
+    } else {
+      href +=
+        ":ital,wght@" +
+        collector[i].normWeights.map((w) => "0," + w + ";") +
+        collector[i].italWeights.map((w) => "1," + w + ";");
+      href = href.slice(0, href.length - 1); // remove last semi-colon
+    }
+    href += "&";
+  }
+  href += "display=swap";
+  return href;
 }
 
 export default function gFont(
@@ -154,13 +153,19 @@ export default function gFont(
     fontWeight: string;
   };
 } {
-  if (latestLock === 1)
+  const isServer = !(
+    typeof window !== "undefined" &&
+    window.document &&
+    window.document.createElement
+  );
+
+  if (!isServer && latestLock === 1)
     // true only in very first call to loadGFont
     insertLinkTag();
 
   let collectorIsChanged = collectFont(name, style, weight);
 
-  if (collectorIsChanged) {
+  if (!isServer && collectorIsChanged) {
     stylesheetIsLoading = true;
     attemptProvideLink(8);
     /* use tiny delay to minimize the split-second improper

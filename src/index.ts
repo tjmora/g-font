@@ -107,31 +107,42 @@ export function buildLink(): string {
   let href = "https://fonts.googleapis.com/css2?";
   let i = 0,
     l = collector.length,
-    lr = 0,
+    ln = 0,
     li = 0;
   for (; i < l; i++) {
-    lr = collector[i].normWeights.length;
+    ln = collector[i].normWeights.length;
     li = collector[i].italWeights.length;
     href += "family=" + collector[i].name.split(" ").join("+");
-    if (lr === 1 && collector[i].normWeights[0] === 400 && li === 0) {
+    if (ln === 1 && collector[i].normWeights[0] === 400 && li === 0) {
       // do nothing
-    } else if (lr === 0 && li === 1 && collector[i].italWeights[0] === 400) {
+    } else if (ln === 0 && li === 1 && collector[i].italWeights[0] === 400) {
       href += ":ital@1";
     } else if (
-      lr === 1 &&
+      ln === 1 &&
       collector[i].normWeights[0] === 400 &&
       li === 1 &&
       collector[i].italWeights[0] === 400
     ) {
       href += ":ital@0;1";
-    } else if (lr > 0 && li === 0) {
-      href += ":wght@" + collector[i].normWeights.reduce((acc: string, cur) => acc + cur + ";", "");
+    } else if (ln > 0 && li === 0) {
+      href +=
+        ":wght@" +
+        collector[i].normWeights.reduce(
+          (acc: string, cur) => acc + cur + ";",
+          ""
+        );
       href = href.slice(0, href.length - 1); // remove last semi-colon
     } else {
       href +=
         ":ital,wght@" +
-        collector[i].normWeights.reduce((acc: string, cur) => acc + "0," + cur + ";", "") +
-        collector[i].italWeights.reduce((acc: string, cur) => acc + "1," + cur + ";", "");
+        collector[i].normWeights.reduce(
+          (acc: string, cur) => acc + "0," + cur + ";",
+          ""
+        ) +
+        collector[i].italWeights.reduce(
+          (acc: string, cur) => acc + "1," + cur + ";",
+          ""
+        );
       href = href.slice(0, href.length - 1); // remove last semi-colon
     }
     href += "&";
@@ -184,7 +195,7 @@ export default function gFont(
       weight +
       ";",
     obj: {
-      fontFamily: "font-family: '" + name + "', " + trail,
+      fontFamily: "'" + name + "', " + trail,
       fontStyle: style,
       fontWeight: weight + "",
     },

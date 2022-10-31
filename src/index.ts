@@ -69,8 +69,9 @@ function buildLink(): string {
         collector[i].italWeights.map((w) => "1," + w + ";");
       href = href.slice(0, href.length - 1); // remove last semi-colon
     }
+    href += "&";
   }
-  href += "&display=swap";
+  href += "display=swap";
   return href;
 }
 

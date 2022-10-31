@@ -1,4 +1,4 @@
-export default function gFont(name: string, trail: string, weight?: number, style?: "normal" | "italic"): {
+export default function gFont(name: string, trail: string, style?: "normal" | "italic", weight?: number): {
     css: string;
     obj: {
         fontFamily: string;

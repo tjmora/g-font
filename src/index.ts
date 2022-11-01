@@ -175,7 +175,7 @@ export function buildLink(): string {
   return href;
 }
 
-export function collectFontOnlyIf(cond: boolean) {
+export function collectFontsOnlyIf(cond: boolean) {
   isCollecting = cond;
 }
 

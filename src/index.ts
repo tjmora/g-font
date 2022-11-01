@@ -1,7 +1,5 @@
 const LINKTAG_ID = "tjmora-gFont-linktag";
 
-type FontStyleValueType = "normal" | "italic";
-
 type FontWeightSematicValueType =
   | "thin"
   | "extra light"
@@ -15,12 +13,7 @@ type FontWeightSematicValueType =
 
 type FontWeightValueType = number | FontWeightSematicValueType;
 
-type OtherThan<T extends FontStyleValueType | FontWeightValueType> =
-  T extends FontStyleValueType
-    ? FontWeightValueType
-    : T extends FontWeightValueType
-    ? FontStyleValueType
-    : FontWeightValueType;
+type FontStyleValueType = "normal" | "italic";
 
 const Weights: { [key: string]: number } = {
   thin: 100,
@@ -40,8 +33,9 @@ let collector: {
   italWeights: number[];
 }[] = [];
 
-let latestLock = 1,
-  stylesheetIsLoading = true;
+let isCollecting = true;
+
+let latestLock = 1;
 
 function findInsertionPoint(arr: number[], item: number): number {
   let i = 0,
@@ -73,18 +67,14 @@ function insertLinkTag() {
 
 function attemptProvideLink(delay: number) {
   let lock: number = ++latestLock;
-  /* The lock is to minimize the number of times that the linkTag's href
-   * is dynamically changed, so as to minimize the number of GET requests
-   * for Google Font's stylesheets */
+  /* The lock is to minimize the number of times that the style link tag's href
+   * is dynamically changed in client-rendered components. */
 
   setTimeout(() => {
     if (lock === latestLock) {
       let linkTag = document.getElementById(LINKTAG_ID) as HTMLLinkElement;
       if (typeof linkTag !== "undefined") {
         linkTag!.href = buildLink();
-        setTimeout(() => {
-          stylesheetIsLoading = false;
-        }, 2000);
       } else attemptProvideLink(delay * 2);
       /* delay more to wait for linkTag's creation,
        * also fails to recursive exponential delaying */
@@ -113,14 +103,14 @@ function collectFont(
     // if font is already collected
     if (style === "normal") {
       if (collector[s].normWeights.indexOf(weight) === -1) {
-        pos = findInsertionPoint(collector[s].normWeights, weight); /* sorted */
-        collector[s].normWeights.splice(pos, 0, weight); /* push   */
+        pos = findInsertionPoint(collector[s].normWeights, weight);
+        collector[s].normWeights.splice(pos, 0, weight);
         collectorIsChanged = true;
       }
     } else if (style === "italic") {
       if (collector[s].italWeights.indexOf(weight) === -1) {
-        pos = findInsertionPoint(collector[s].italWeights, weight); /* sorted */
-        collector[s].italWeights.splice(pos, 0, weight); /* push   */
+        pos = findInsertionPoint(collector[s].italWeights, weight);
+        collector[s].italWeights.splice(pos, 0, weight);
         collectorIsChanged = true;
       }
     }
@@ -185,11 +175,15 @@ export function buildLink(): string {
   return href;
 }
 
-export default function gFont<T extends FontStyleValueType | FontWeightValueType>(
+export function collectFontOnlyIf(cond: boolean) {
+  isCollecting = cond;
+}
+
+export default function gFont(
   name: string,
-  trail: string,
-  styleParam1?: T,
-  styleParam2?: OtherThan<T>
+  fallback: string,
+  weight: FontWeightValueType = 400,
+  style: FontStyleValueType = "normal"
 ): {
   css: string;
   obj: {
@@ -198,49 +192,23 @@ export default function gFont<T extends FontStyleValueType | FontWeightValueType
     fontWeight: string;
   };
 } {
-  let fstyle: FontStyleValueType;
-  let fweight: number;
-  if (styleParam1 === undefined) {
-    fstyle = "normal";
-    fweight = 400;
-  } else if (styleParam2 === undefined) {
-    if (styleParam1 === "normal" || styleParam1 === "italic") {
-      fstyle = styleParam1;
-      fweight = 400;
-    } else {
-      fstyle = "normal";
-      if (typeof styleParam1 === "number") fweight = styleParam1;
-      else fweight = Weights[styleParam1];
-    }
-  } else {
-    if (styleParam1 === "normal" || styleParam1 === "italic") {
-      fstyle = styleParam1;
-      if (typeof styleParam2 === "number") fweight = styleParam2;
-      else fweight = Weights[styleParam2];
-    } else {
-      if (typeof styleParam1 === "number") fweight = styleParam1;
-      else fweight = Weights[styleParam1];
-      fstyle = styleParam2 as FontStyleValueType;
-    }
-  }
+  if (typeof weight !== "number")
+    weight = Weights[weight];
 
-  const isServer = !(
-    typeof window !== "undefined" &&
-    window.document &&
-    window.document.createElement
-  );
+  if (isCollecting) {
+    const isServerRendered = !(
+      typeof window !== "undefined" &&
+      window.document &&
+      window.document.createElement
+    );
 
-  if (!isServer && latestLock === 1)
-    // true only in very first call to loadGFont
-    insertLinkTag();
+    if (!isServerRendered && latestLock === 1)
+      // true only in very first call to gFont for client-rendered components
+      insertLinkTag();
 
-  let collectorIsChanged = collectFont(name, fstyle, fweight);
+    let collectorIsChanged = collectFont(name, style, weight);
 
-  if (!isServer && collectorIsChanged) {
-    stylesheetIsLoading = true;
-    attemptProvideLink(8);
-    /* use tiny delay to minimize the split-second improper
-     * rendering of the page on load */
+    if (!isServerRendered && collectorIsChanged) attemptProvideLink(8);
   }
 
   return {
@@ -248,16 +216,16 @@ export default function gFont<T extends FontStyleValueType | FontWeightValueType
       "font-family: '" +
       name +
       "', " +
-      trail +
+      fallback +
       "; font-style: " +
-      fstyle +
+      style +
       "; font-weight: " +
-      fweight +
+      weight +
       ";",
     obj: {
-      fontFamily: "'" + name + "', " + trail,
-      fontStyle: fstyle,
-      fontWeight: fweight + "",
+      fontFamily: "'" + name + "', " + fallback,
+      fontStyle: style,
+      fontWeight: weight + "",
     },
   };
 }

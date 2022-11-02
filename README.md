@@ -4,11 +4,13 @@ Using Google Fonts is sometimes a trial-and-error undertaking. We try different 
 of Google Fonts until we are satisfied with our designs. This library will make it easy 
 try different Google Fonts while still on a development server.
 
+
 ### Installation
 
 ```
 npm i @tjmora/g-font
 ```
+
 
 ### Usage
 
@@ -68,6 +70,7 @@ The `font` method has two types of return values:
 * `font(...).css` is a string formatted in a valid css syntax.
 * `font(...).obj` is an object with camelCased style props and their values.
 
+
 ### Development vs Production
 
 In our context file **gfont.ts**, we constructed a new GFont instance by passing a boolean, 
@@ -76,10 +79,10 @@ whether the `process.env.NODE_ENV === "development"` is true or not. We do this 
 environments.
 
 If **true** is passed to `new GFont(...)`, the `font` method automatically collects all the 
-fonts and their weights and styles, and automatically inserts a stylesheet `<link>` tag with a 
+fonts and their weights and styles, and automatically inserts a stylesheet `<link>` tag with an 
 automatically-generated href to the DOM. This will allow you to quickly see how the different 
 fonts you try get rendered by the browser. The fonts load slowly at page load and at any 
-re-hydration. This slow font-rendering behavior is really only tolerable in a developmental 
+hydration. This slow font-rendering behavior is really only tolerable in a developmental 
 environment.
 
 If **false** is passed to `new GFont(...)`, the `font` method still returns the `.css` string of 
@@ -91,6 +94,7 @@ final selection of fonts on your own and then add all the necessary stylesheet `
 your App or Document file/component. This is the only pragmatic way of speeding up the load up 
 times of your chosen fonts.
 
+
 ### Stylesheet Link Generation
 
 If you don't wish to generate the stylesheet link using Google Fonts' website, you can do the 
@@ -100,11 +104,11 @@ following:
 hydration events lead up to the collection of all the fonts your website needs (and making 
 sure you're not refreshing the tab).
 
-2. Bring up the browser's inspection tool in order 
-to look for the `<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your 
-document's head. Copy the generated value inside the `href` attribute, and paste it somewhere.
+2. Bring up the browser's inspection tool and look for the 
+`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your document's head. 
+Copy the generated value inside the `href` attribute, and paste it somewhere.
 
-3. Place the following `link` tags somewhere in your App or Document file/component (within  
+1. Place the following `link` tags somewhere in your App or Document file/component (within  
 `<head>` or `<Head>` tags):
 
 ```
@@ -116,6 +120,7 @@ document's head. Copy the generated value inside the `href` attribute, and paste
 Change the value of CHANGE_THIS to the value of the `href` you copied earlier. You can opt to 
 replace the `&display=block` part of the link with `&display=swap`. [Check this out to learn 
 more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
+
 
 ### Server-Rendering/Static Generation (e.g., Next.js)
 
@@ -148,14 +153,15 @@ export default function App({ Component, pageProps }: AppProps) {
 ```
 
 The `g.buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
-weights and styles) collected so far. **It needs to be called after every component is already 
-rendered.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
+weights and styles) collected so far. **It needs to be included after every component is already 
+included.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
 
-This manually-added `<link>` tag is only important for page loads. For re-hydration, the `font` 
+This manually-added `<link>` tag is only important for the page loads. For hydration, the `font` 
 method works as expected. In development, it collects fonts, weights and styles and dynamically 
 inserts a stylesheet `<link>` tag to the DOM. In production, it doesn't do the collecting and 
 the dynamic insertion of `<link>` tags. You need to place the necessary `<link>` tags yourself 
 as discussed previously in the **Stylesheet Link Generation** section.
+
 
 ### Test
 

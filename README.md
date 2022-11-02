@@ -1,16 +1,16 @@
-# @tjmora/g-font
+## @tjmora/g-font
 
 Using Google Fonts is sometimes a trial-and-error undertaking. We try different combinations
 of Google Fonts until we are satisfied with our designs. This library will make it easy 
 try different Google Fonts while still on a development server.
 
-## Installation
+### Installation
 
 ```
 npm i @tjmora/g-font
 ```
 
-## Usage
+### Usage
 
 First we create a context. Somewhere in your project, create a `gfont.ts` or `gfont.js` file.
 
@@ -23,10 +23,10 @@ const g = new GFont(process.env.NODE_ENV === "development");
 export default g;
 ```
 
-Next, we import this context to any of our components.
+Next, we import this context to our component.
 
 ```typescript
-import g from "./gfont.ts";
+import g from "./gfont";
 import styled from "styled-components";
 
 const StyledDiv = styled.div`
@@ -68,21 +68,21 @@ The `font` method has two types of return values:
 * `font(...).css` is a string formatted in a valid css syntax.
 * `font(...).obj` is an object with camelCased style props and their values.
 
-## Development vs Production
+### Development vs Production
 
-In our context file `gfont.ts` we constructed a new GFont instance by passing a boolean, 
+In our context file **gfont.ts**, we constructed a new GFont instance by passing a boolean, 
 whether the `process.env.NODE_ENV === "development"` is true or not. We do this because the 
 `font` method is supposed to behave differently between the developmental and production 
 environments.
 
-If true is passed to `new GFont(...)`, the `font` method automatically collects all the fonts 
-and their weights and styles, automatically generates a Google Font stylesheet link, and 
-automatically inserts a stylesheet link tag to the DOM. This will allow you to quickly see how 
-the different fonts you try get rendered by the browser. The fonts load slowly at page load 
-and at any re-hydration. This slow font-rendering behavior is really only tolerable in a 
-developmental environment.
+If **true** is passed to `new GFont(...)`, the `font` method automatically collects all the 
+fonts and their weights and styles, and automatically inserts a stylesheet link tag with a 
+automatically-generated href to the DOM. This will allow you to quickly see how the different 
+fonts you try get rendered by the browser. The fonts load slowly at page load and at any 
+re-hydration. This slow font-rendering behavior is really only tolerable in a developmental 
+environment.
 
-If false is passed to `new GFont(...)`, the `font` method still returns the `.css` string of 
+If **false** is passed to `new GFont(...)`, the `font` method still returns the `.css` string of 
 valid css syntax, and the `.obj` object of valid inline style values. So you don't need to 
 refactor those `font` method calls into native css or inline style props. However, there will be 
 no attempt in collecting the fonts and their weights and their styles, and no attempt in 
@@ -91,20 +91,20 @@ final selection of fonts on your own and then add all the necessary stylesheet l
 your App or Layout component. This is the only pragmatic way of speeding up the load up times 
 of your chosen fonts.
 
-## Stylesheet Link Generation
+### Stylesheet Link Generation
 
 If you don't wish to generate the stylesheet link using Google Fonts' website, you can do the 
 following:
 
-Do everything your website can in developmental mode, making sure all the 
+1. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs (and making 
-sure you're not refreshing the tab)
+sure you're not refreshing the tab).
 
-Bring up the browser's inspection tool in order 
+2. Bring up the browser's inspection tool in order 
 to look for the `<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your 
-document's head. Copy the value generated inside the `href` attribute, and paste it somewhere.
+document's head. Copy the generated value inside the `href` attribute, and paste it somewhere.
 
-Include the following in your App or Document component:
+3. Include the following somewhere in your App or Document component:
 
 ```
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,7 +116,7 @@ Change the value of CHANGE_THIS to the value of the `href` you copied earlier. Y
 replace the `&display=block` part of the link with `&display=swap`. [Check this out to learn 
 more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 
-## Server-Rendering/Static Generation (e.g., Next.js)
+### Server-Rendering/Static Generation (e.g., Next.js)
 
 The `font` method can distinguish between being rendered on the client-sie or being rendered on 
 the server-side. If server-rendered and the environment is development, the `font` method still 
@@ -150,12 +150,12 @@ The `g.buildLink()` will build a Google Font stylesheet link of all the fonts (a
 weights and styles) collected so far. **It needs to be called after every component is already 
 rendered.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
 
-This manually-added link tag is only important for page loads. For re-hydration, the `g.font` 
+This manually-added link tag is only important for page loads. For re-hydration, the `font` 
 method works as expected. In development, it collects fonts, weights and styles and dynamically 
 inserts a stylesheet link tag to the DOM. In production, it doesn't do the collecting and the 
-dynamic insertion of link tags. You need to insert the link tags yourself as discussed 
-previously in the Stylesheet Link Generation section.
+dynamic insertion of link tags. You need to place the necessary link tags yourself as discussed 
+previously in the **Stylesheet Link Generation** section.
 
-## Test
+### Test
 
 The test for this package is a [separate repo](https://github.com/tjmora/g-font-test).

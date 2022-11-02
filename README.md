@@ -88,8 +88,8 @@ refactor those `font` method calls into native css or inline style props. Howeve
 no attempt in collecting the fonts and their weights and their styles, and no attempt in 
 dynamically inserting any stylesheet link tag to the DOM. You are supposed to collect your 
 final selection of fonts on your own and then add all the necessary stylesheet link tags to 
-your App or Layout component. This is the only pragmatic way of speeding up the load up times 
-of your chosen fonts.
+your App or Document file/component. This is the only pragmatic way of speeding up the load up 
+times of your chosen fonts.
 
 ### Stylesheet Link Generation
 
@@ -104,7 +104,8 @@ sure you're not refreshing the tab).
 to look for the `<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your 
 document's head. Copy the generated value inside the `href` attribute, and paste it somewhere.
 
-3. Include the following somewhere in your App or Document component:
+3. Place the following `link` tags somewhere in your App or Document file/component (within  
+`<head>` or `<Head>` tags):
 
 ```
 <link rel="preconnect" href="https://fonts.googleapis.com">

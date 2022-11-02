@@ -1,27 +1,14 @@
-type FontWeightSematicValueType =
-  | "thin"
-  | "extra light"
-  | "light"
-  | "regular"
-  | "medium"
-  | "semi-bold"
-  | "bold"
-  | "extra bold"
-  | "black";
-
-type FontWeightValueType = number | FontWeightSematicValueType;
-
-type FontStyleValueType = "normal" | "italic";
+import { GFontName, IMapForVariants } from "./gFontInterfaces";
 
 const Weights: { [key: string]: number } = {
   thin: 100,
-  "extra light": 200,
+  extralight: 200,
   light: 300,
   regular: 400,
   medium: 500,
-  "semi-bold": 600,
+  semibold: 600,
   bold: 700,
-  "extra bold": 800,
+  extrabold: 800,
   black: 900,
 };
 
@@ -34,8 +21,26 @@ function findInsertionPoint(arr: number[], item: number): number {
   return i;
 }
 
-export default class GFont {
+function insertLinkTag(linkTagId: string) {
+  let linkTag = document.createElement("link");
+  linkTag.id = linkTagId;
+  linkTag.rel = "stylesheet";
+  linkTag.type = "text/css";
+  linkTag.href = "";
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      (e) => {
+        document.querySelector("head")!.appendChild(linkTag);
+      },
+      false
+    );
+  } else {
+    document.querySelector("head")!.appendChild(linkTag);
+  }
+}
 
+export default class GFont {
   private linkTagId: string;
 
   private collector: {
@@ -50,50 +55,30 @@ export default class GFont {
 
   constructor(cond: boolean) {
     this.isCollecting = cond;
-    this.linkTagId = "tjmora-g-font-" + (Math.random() + 1).toString(36).substring(7);
-  }
-
-  private insertLinkTag() {
-    let linkTag = document.createElement("link");
-    linkTag.id = this.linkTagId;
-    linkTag.rel = "stylesheet";
-    linkTag.type = "text/css";
-    linkTag.href = "";
-    if (document.readyState === "loading") {
-      document.addEventListener(
-        "DOMContentLoaded",
-        (e) => {
-          document.querySelector("head")!.appendChild(linkTag);
-        },
-        false
-      );
-    } else {
-      document.querySelector("head")!.appendChild(linkTag);
-    }
+    this.linkTagId =
+      "tjmora-g-font-" + (Math.random() + 1).toString(36).substring(7);
   }
 
   private attemptProvideLink(delay: number) {
     let lock: number = ++this.latestLock;
     /* The lock is to minimize the number of times that the style link tag's href
-    * is dynamically changed in client-rendered components. */
+     * is dynamically changed in client-rendered components. */
 
     setTimeout(() => {
       if (lock === this.latestLock) {
-        let linkTag = document.getElementById(this.linkTagId) as HTMLLinkElement;
+        let linkTag = document.getElementById(
+          this.linkTagId
+        ) as HTMLLinkElement;
         if (typeof linkTag !== "undefined") {
           linkTag!.href = this.buildLink();
         } else this.attemptProvideLink(delay * 2);
         /* delay more to wait for linkTag's creation,
-        * also fails to recursive exponential delaying */
+         * also fails to recursive exponential delaying */
       }
     }, delay);
   }
 
-  private collectFont(
-    name: string,
-    style: FontStyleValueType,
-    weight: number
-  ): boolean {
+  private collectFont(name: string, style: string, weight: number): boolean {
     let l = this.collector.length,
       s = -1,
       pos = 0;
@@ -146,7 +131,11 @@ export default class GFont {
       href += "family=" + this.collector[i].name.split(" ").join("+");
       if (ln === 1 && this.collector[i].normWeights[0] === 400 && li === 0) {
         // do nothing
-      } else if (ln === 0 && li === 1 && this.collector[i].italWeights[0] === 400) {
+      } else if (
+        ln === 0 &&
+        li === 1 &&
+        this.collector[i].italWeights[0] === 400
+      ) {
         href += ":ital@1";
       } else if (
         ln === 1 &&
@@ -182,21 +171,28 @@ export default class GFont {
     return href;
   }
 
-  public font(
-    name: string,
+  public font<T extends GFontName>(
+    name: T,
     fallback: string,
-    weight: FontWeightValueType = 400,
-    style: FontStyleValueType = "normal"
+    variant?: IMapForVariants[T]
   ): {
     css: string;
     obj: {
       fontFamily: string;
-      fontStyle: string;
       fontWeight: string;
+      fontStyle?: string;
     };
   } {
-    if (typeof weight !== "number")
-      weight = Weights[weight];
+    let style = "normal";
+    let weight = 400;
+    if (variant) {
+      let variantParts = variant.split("-");
+      if (variantParts.length > 1) style = variantParts[1];
+      if (variantParts[0].match(/^[0-9]+$/)) weight = parseInt(variantParts[0]);
+      else {
+        if (Weights[variantParts[0]]) weight = Weights[variantParts[0]];
+      }
+    }
 
     if (this.isCollecting) {
       const isServerRendered = !(
@@ -207,29 +203,37 @@ export default class GFont {
 
       if (!isServerRendered && this.latestLock === 1)
         // true only in very first call to gFont for client-rendered components
-        this.insertLinkTag();
+        insertLinkTag(this.linkTagId);
 
       let collectorIsChanged = this.collectFont(name, style, weight);
 
       if (!isServerRendered && collectorIsChanged) this.attemptProvideLink(8);
     }
 
+    const css =
+      "font-family: '" +
+      name +
+      "', " +
+      fallback +
+      "; font-weight: " +
+      weight +
+      (style === "italic" ? "; font-style: " + style : "") +
+      ";";
+
+    let obj: {
+      fontFamily: string;
+      fontWeight: string;
+      fontStyle?: string;
+    } = {
+      fontFamily: "'" + name + "', " + fallback,
+      fontWeight: weight + "",
+    };
+
+    if (style === "italic") obj["fontStyle"] = style;
+
     return {
-      css:
-        "font-family: '" +
-        name +
-        "', " +
-        fallback +
-        "; font-style: " +
-        style +
-        "; font-weight: " +
-        weight +
-        ";",
-      obj: {
-        fontFamily: "'" + name + "', " + fallback,
-        fontStyle: style,
-        fontWeight: weight + "",
-      },
+      css: css,
+      obj: obj,
     };
   }
 }

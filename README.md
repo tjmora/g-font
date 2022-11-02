@@ -36,7 +36,7 @@ const StyledDiv = styled.div`
   width: 100%;
   h1 {
     font-size: 1.8rem;
-    ${g.font("Raleway", "Verdana, sans-serif", "semi-bold").css}
+    ${g.font("Raleway", "Verdana, sans-serif", "semibold").css}
   }
   p {
     font-size: 1rem;
@@ -44,7 +44,7 @@ const StyledDiv = styled.div`
   }
   blockquote {
     font-size: 1.2rem;
-    ${g.font("Lora", "Georgia, serif", 500, "italic").css}
+    ${g.font("Lora", "Georgia, serif", "500-italic").css}
   }
 `;
 
@@ -52,7 +52,7 @@ export default function MyComponent({children}: {children?: React.ReactNode}) {
   return (
     <StyledDiv>
       {children}
-      <a href="/" style={{...g.font("Nunito", "Arial, sans-serif", 600).obj}}>Back to Home</a>
+      <a href="/" style={{...g.font("Nunito", "Arial, sans-serif", "600").obj}}>Back to Home</a>
     <StyledDiv>
   )
 }
@@ -62,8 +62,10 @@ The `font` method takes the following arguments:
 
 * **name** - the name of the font
 * **fallback** - the fallback font in case the Google font doesn't load
-* **weight** - The weight of the font either in numeral form, or as a name ("thin", "extra light", "light", "regular", "medium", "semi-bold", "bold", "extra bold", "black"). Defaults to "regular" or 400 if not provided.
-* **style** - The font style, either "normal" or "italic". Defaults to "normal" if not provided.
+* **variant** - The weight and style of the font. It can be numeral form (e.g., `"400"`, `"400-italic"`, `"300"`, `"700-bold"`, etc.), or it can be in semantic form (e.g., `"thin"`, `"extralight-italic"`, `"light"`, `"regular-italic"`, `"medium"`, `"semibold-italic"`, `"bold"`, `"extrabold-italic"`, `"black"`, etc.).
+
+If you use Typescript, the **intellisense** of your code editor may be able to 
+**limit the variants** you can enter based on what is actually possible for that font. 
 
 The `font` method has two types of return values:
 

@@ -76,7 +76,7 @@ whether the `process.env.NODE_ENV === "development"` is true or not. We do this 
 environments.
 
 If **true** is passed to `new GFont(...)`, the `font` method automatically collects all the 
-fonts and their weights and styles, and automatically inserts a stylesheet link tag with a 
+fonts and their weights and styles, and automatically inserts a stylesheet `<link>` tag with a 
 automatically-generated href to the DOM. This will allow you to quickly see how the different 
 fonts you try get rendered by the browser. The fonts load slowly at page load and at any 
 re-hydration. This slow font-rendering behavior is really only tolerable in a developmental 
@@ -86,8 +86,8 @@ If **false** is passed to `new GFont(...)`, the `font` method still returns the 
 valid css syntax, and the `.obj` object of valid inline style values. So you don't need to 
 refactor those `font` method calls into native css or inline style props. However, there will be 
 no attempt in collecting the fonts and their weights and their styles, and no attempt in 
-dynamically inserting any stylesheet link tag to the DOM. You are supposed to collect your 
-final selection of fonts on your own and then add all the necessary stylesheet link tags to 
+dynamically inserting any stylesheet `<link>` tag to the DOM. You are supposed to collect your 
+final selection of fonts on your own and then add all the necessary stylesheet `<link>` tags to 
 your App or Document file/component. This is the only pragmatic way of speeding up the load up 
 times of your chosen fonts.
 
@@ -122,9 +122,9 @@ more about block vs swap](https://developer.chrome.com/blog/font-display/#font-d
 The `font` method can distinguish between being rendered on the client-sie or being rendered on 
 the server-side. If server-rendered and the environment is development, the `font` method still 
 collects all the fonts and their weights and styles, but it makes no attempt in generating a 
-stylesheet link nor attempt to insert a stylesheet link tag to the DOM.
+stylesheet link nor attempt to insert a stylesheet `<link>` tag to the DOM.
 
-One thing you can do is to include the stylesheet link tag yourself. For example, here's 
+One thing you can do is to include the stylesheet `<link>` tag yourself. For example, here's 
 how it should be done in Next.js:
 
 `_app.tsx`
@@ -151,11 +151,11 @@ The `g.buildLink()` will build a Google Font stylesheet link of all the fonts (a
 weights and styles) collected so far. **It needs to be called after every component is already 
 rendered.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
 
-This manually-added link tag is only important for page loads. For re-hydration, the `font` 
+This manually-added `<link>` tag is only important for page loads. For re-hydration, the `font` 
 method works as expected. In development, it collects fonts, weights and styles and dynamically 
-inserts a stylesheet link tag to the DOM. In production, it doesn't do the collecting and the 
-dynamic insertion of link tags. You need to place the necessary link tags yourself as discussed 
-previously in the **Stylesheet Link Generation** section.
+inserts a stylesheet `<link>` tag to the DOM. In production, it doesn't do the collecting and 
+the dynamic insertion of `<link>` tags. You need to place the necessary `<link>` tags yourself 
+as discussed previously in the **Stylesheet Link Generation** section.
 
 ### Test
 

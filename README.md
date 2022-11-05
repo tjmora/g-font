@@ -48,7 +48,7 @@ const StyledDiv = styled.div`
   }
   blockquote {
     font-size: 1.2rem;
-    ${g.font("Lora", "Georgia, serif", 500, "italic").css}
+    ${g.font("Lora", "Georgia, serif", "500", "italic").css}
   }
 `;
 
@@ -56,7 +56,7 @@ export default function MyComponent({children}: {children?: React.ReactNode}) {
   return (
     <StyledDiv>
       {children}
-      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "550", "slnt=-10").obj}}>Some Link</a>
+      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "750", "slnt=-10").obj}}>Some Link</a>
     <StyledDiv>
   )
 }
@@ -66,8 +66,8 @@ The `font` method takes the following arguments:
 
 * **name** - The name of the font.
 * **fallback** - The fallback font in case the Google font doesn't load.
-* **weight** - The weight of the font. Defaults to `regular` or `400` if not provided. The value can be semantic, numeric or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`. Numeric values like `400` is limited to the default weights that the font has. String-numeric values like `"500"` (with quotes) are for values within the font's variable weight range, if any. 
-* **variantion** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt=-30"` if the font has a slant axis, or `"wdth=120.0"` if the font has a width axis, or others.
+* **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
+* **variantion** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt=-30"` if the font has a slant axis, or `"wdth=120.0"` if the font has a width axis, or other variation settings possible for a font.
 
 If you use Typescript, the **intellisense** of your code editor may be able to 
 **limit the variants** you can enter based on what is actually possible for that font. 

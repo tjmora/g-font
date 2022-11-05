@@ -151,7 +151,7 @@ function variationsToCss(variations?: string[]): string {
 function variationsToObj(variations?: string[]): {
   [key: string]: string | number;
 } {
-  let result: {[key: string]: string | number;} = {};
+  let result: { [key: string]: string | number } = {};
   let subset: [string, string][] = [];
   if (variations) {
     variations.forEach((variation) => {
@@ -281,7 +281,7 @@ export default class GFont {
   public font_(
     name: string,
     fallback: string,
-    weight?: string | number,
+    weight?: string,
     ...variations: string[]
   ): {
     css: string;

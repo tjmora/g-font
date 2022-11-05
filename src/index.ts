@@ -95,6 +95,20 @@ function putDefaultValuesToEntries(fonts: CollectedFonts) {
       });
       pushUniqueEntry(newEntries, newEntry);
     });
+    newEntries.sort((a, b) => {
+      let result = 0;
+      for (let i = 0, l = fonts[key].tags.length; i < l; i++) {
+        if (a[fonts[key].tags[i]] < b[fonts[key].tags[i]]) {
+          result = -1;
+          break;
+        }
+        else if (a[fonts[key].tags[i]] > b[fonts[key].tags[i]]) {
+          result = 1;
+          break;
+        }
+      }
+      return result;
+    })
     fonts[key].entries = newEntries;
   }
 }

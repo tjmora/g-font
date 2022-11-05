@@ -70,7 +70,7 @@ function pushUniqueEntry(
     let same = true;
     let keys = Object.keys(arr[i]);
     for (let j = 0, k = keys.length; j < k; j++) {
-      if (!item[keys[j]] || arr[i][keys[j]] !== item[keys[j]]) {
+      if (item[keys[j]] === undefined || arr[i][keys[j]] !== item[keys[j]]) {
         same = false;
         break;
       }

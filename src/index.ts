@@ -64,18 +64,34 @@ function pushUniqueTag(arr: string[], newTag: string): boolean {
   return true;
 }
 
+function areKeysTheSame(tags1: string[], tags2: string[]): boolean {
+  let result = true;
+  if (tags1.length !== tags2.length) return false;
+  for (let i = 0, l = tags1.length; i < l; i++) {
+    if (tags1[i] !== tags2[i]) {
+      result = false;
+      break;
+    }
+  }
+  return result;
+}
+
 function pushUniqueEntry(
   arr: { [key: string]: number }[],
-  item: { [key: string]: number }
+  newEntry: { [key: string]: number }
 ): boolean {
   let unique = true;
   for (let i = 0, l = arr.length; i < length; i++) {
     let same = true;
-    let keys = Object.keys(arr[i]);
-    for (let j = 0, k = keys.length; j < k; j++) {
-      if (item[keys[j]] === undefined || arr[i][keys[j]] !== item[keys[j]]) {
-        same = false;
-        break;
+    let keys1 = Object.keys(arr[i]);
+    let keys2 = Object.keys(newEntry);
+    if (!areKeysTheSame(keys1, keys2)) same = false;
+    else {
+      for (let j = 0, l = keys1.length; j < l; j++) {
+        if (arr[i][keys1[j]] !== newEntry[keys1[j]]) {
+          same = false;
+          break;
+        }
       }
     }
     if (same) {
@@ -83,7 +99,7 @@ function pushUniqueEntry(
       break;
     }
   }
-  if (unique) arr.push(item);
+  if (unique) arr.push(newEntry);
   return unique;
 }
 
@@ -91,7 +107,7 @@ function generateEntriesWithDefaults(fonts: CollectedFonts) {
   for (const key in fonts) {
     fonts[key].entriesWithDefaults = [];
     fonts[key].entries.forEach((entry) => {
-      let entryWithDefaults: {[key: string]: number;} = {};
+      let entryWithDefaults: { [key: string]: number } = {};
       fonts[key].tags.forEach((tag) => {
         if (!entry[tag]) entryWithDefaults[tag] = DefaultValues[tag];
         else entryWithDefaults[tag] = entry[tag];
@@ -102,11 +118,10 @@ function generateEntriesWithDefaults(fonts: CollectedFonts) {
       let result = 0;
       for (let i = 0, l = fonts[key].tags.length; i < l; i++) {
         result = a[fonts[key].tags[i]] - b[fonts[key].tags[i]];
-        if (result !== 0)
-          break;
+        if (result !== 0) break;
       }
       return result;
-    })
+    });
   }
 }
 
@@ -280,9 +295,16 @@ export default class GFont {
       const tagsLength = this.collector[key].tags.length;
       if (tagsLength) {
         href += ":" + this.collector[key].tags.join(",") + "@";
-        for (let i = 0, l = this.collector[key].entriesWithDefaults.length; i < l; i++) {
+        for (
+          let i = 0, l = this.collector[key].entriesWithDefaults.length;
+          i < l;
+          i++
+        ) {
           for (let j = 0; j < tagsLength; j++) {
-            href += this.collector[key].entriesWithDefaults[i][this.collector[key].tags[j]];
+            href +=
+              this.collector[key].entriesWithDefaults[i][
+                this.collector[key].tags[j]
+              ];
             if (j !== tagsLength - 1) href += ",";
           }
           if (i !== l - 1) href += ";";

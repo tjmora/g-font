@@ -87,7 +87,7 @@ function pushUniqueEntry(
     let keys2 = Object.keys(newEntry);
     if (!areKeysTheSame(keys1, keys2)) same = false;
     else {
-      for (let j = 0, l = keys1.length; j < l; j++) {
+      for (let j = 0, k = keys1.length; j < k; j++) {
         if (arr[i][keys1[j]] !== newEntry[keys1[j]]) {
           same = false;
           break;

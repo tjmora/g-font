@@ -1,20 +1,24 @@
-## @tjmora/g-font
+# @tjmora/g-font
 
-Using Google Fonts is sometimes a trial-and-error undertaking. We try different combinations
-of Google Fonts until we are satisfied with our designs. This library will make it easy 
-try different Google Fonts while still on a development server.
+This will help you try different Google Fonts without needing to generate stylesheet URLs 
+every time you change your fonts. The stylesheet URLs are automatically-generated while 
+on you're on a development environment (A little more steps are needed for production 
+environment). If used with Typescript, your code editor's IntelliSense will limit you to 
+valid font names, valid weights and styles for each font, and valid variation setting for 
+each font. 
 
 
-### Installation
+## Installation
 
 ```
 npm i @tjmora/g-font
 ```
 
 
-### Usage
+## Usage
 
-First we create a context. Somewhere in your project, create a `gfont.ts` or `gfont.js` file.
+First we create a context. Somewhere in your project, create a **gfont.ts** or **gfont.js** 
+file.
 
 ```typescript
 import GFont from "@tjmora/g-font"; // for Typescript
@@ -44,7 +48,7 @@ const StyledDiv = styled.div`
   }
   blockquote {
     font-size: 1.2rem;
-    ${g.font("Lora", "Georgia, serif", "500-italic").css}
+    ${g.font("Lora", "Georgia, serif", 500, "italic").css}
   }
 `;
 
@@ -52,7 +56,7 @@ export default function MyComponent({children}: {children?: React.ReactNode}) {
   return (
     <StyledDiv>
       {children}
-      <a href="/" style={{...g.font("Nunito", "Arial, sans-serif", "600").obj}}>Back to Home</a>
+      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "550", "slnt=-10").obj}}>Some Link</a>
     <StyledDiv>
   )
 }
@@ -60,9 +64,10 @@ export default function MyComponent({children}: {children?: React.ReactNode}) {
 
 The `font` method takes the following arguments:
 
-* **name** - the name of the font
-* **fallback** - the fallback font in case the Google font doesn't load
-* **variant** - The weight and style of the font. It can be numeral form (e.g., `"400"`, `"400-italic"`, `"300"`, `"700-bold"`, etc.), or it can be in semantic form (e.g., `"thin"`, `"extralight-italic"`, `"light"`, `"regular-italic"`, `"medium"`, `"semibold-italic"`, `"bold"`, `"extrabold-italic"`, `"black"`, etc.).
+* **name** - The name of the font.
+* **fallback** - The fallback font in case the Google font doesn't load.
+* **weight** - The weight of the font. Defaults to `regular` or `400` if not provided. The value can be semantic, numeric or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`. Numeric values like `400` is limited to the default weights that the font has. String-numeric values like `"500"` (with quotes) are for values within the font's variable weight range, if any. 
+* **variantion** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt=-30"` if the font has a slant axis, or `"wdth=120.0"` if the font has a width axis, or others.
 
 If you use Typescript, the **intellisense** of your code editor may be able to 
 **limit the variants** you can enter based on what is actually possible for that font. 
@@ -73,7 +78,17 @@ The `font` method has two types of return values:
 * `font(...).obj` is an object with camelCased style props and their values.
 
 
-### Development vs Production
+## `font` vs `font_` methods
+
+The `font` method, in Typescript, enforces the custom font and value types which were created 
+to help IntelliSense recommend valid values to you.
+
+The `font_` method, do not enforce those custom font and value types. Those custom font and 
+value types aren't perfect, and the `font` method may sometimes be wrongly linted as erroneous. 
+Simply add an underscore to the method to disable the enforcing of those types. 
+
+
+## Development vs Production
 
 In our context file **gfont.ts**, we constructed a new GFont instance by passing a boolean, 
 whether the `process.env.NODE_ENV === "development"` is true or not. We do this because the 
@@ -81,58 +96,54 @@ whether the `process.env.NODE_ENV === "development"` is true or not. We do this 
 environments.
 
 If **true** is passed to `new GFont(...)`, the `font` method automatically collects all the 
-fonts and their weights and styles, and automatically inserts a stylesheet `<link>` tag with an 
-automatically-generated href to the DOM. This will allow you to quickly see how the different 
-fonts you try get rendered by the browser. The fonts load slowly at page load and at any 
-hydration. This slow font-rendering behavior is really only tolerable in a developmental 
-environment.
+fonts and their weights, styles and variation settings, and automatically inserts a 
+stylesheet `<link>` tag with an automatically-generated href to the DOM. This will allow you 
+to quickly see how the different fonts you try get rendered by the browser. The fonts load 
+slowly at page load and at hydration. This slow font-rendering behavior is really only 
+tolerable in a developmental environment.
 
 If **false** is passed to `new GFont(...)`, the `font` method still returns the `.css` string of 
-valid css syntax, and the `.obj` object of valid inline style values. So you don't need to 
+valid css syntax, and the `.obj` object of valid inline style prop values. So you don't need to 
 refactor those `font` method calls into native css or inline style props. However, there will be 
-no attempt in collecting the fonts and their weights and their styles, and no attempt in 
-dynamically inserting any stylesheet `<link>` tag to the DOM. You are supposed to collect your 
-final selection of fonts on your own and then add all the necessary stylesheet `<link>` tags to 
-your App or Document file/component. This is the only pragmatic way of speeding up the load up 
-times of your chosen fonts.
+no attempt in collecting the fonts and their weights, styles and variation settings, and 
+no attempt as well in dynamically inserting any stylesheet `<link>` tag to the DOM. You are 
+supposed to collect your final selection of fonts on your own and then add all the necessary 
+stylesheet `<link>` tags to your App or Document file/component. This is the only pragmatic way 
+of speeding up the load up times of your chosen fonts in production.
 
+You don't need to generate the stylesheet URL using Google Fonts' website, you can do the 
+following instead:
 
-### Stylesheet Link Generation
-
-If you don't wish to generate the stylesheet link using Google Fonts' website, you can do the 
-following:
-
-1. Do everything your website can in developmental mode, making sure all the 
-hydration events lead up to the collection of all the fonts your website needs (and making 
-sure you're not refreshing the tab).
-
-2. Bring up the browser's inspection tool and look for the 
-`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your document's head. 
-Copy the generated value inside the `href` attribute, and paste it somewhere.
-
-1. Place the following `link` tags somewhere in your App or Document file/component (within  
-`<head>` or `<Head>` tags):
+1. Place the following `link` tags somewhere in your app, document or layout file/component (within  `<head>` or `<Head>` tags):
 
 ```
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
 <link href="CHANGE_THIS" rel="stylesheet">
 ```
 
-Change the value of CHANGE_THIS to the value of the `href` you copied earlier. You can opt to 
-replace the `&display=block` part of the link with `&display=swap`. [Check this out to learn 
-more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
+2. Do everything your website can in developmental mode, making sure all the 
+hydration events lead up to the collection of all the fonts your website needs, and making 
+sure you're not refreshing the tab.
+
+3. Bring up the browser's inspection tool and look for the 
+`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your document's head. 
+Copy the generated value inside the `href` attribute, and replace the `CHANGE_THIS` href value 
+from step no. 1 with it. You can opt to replace the `&display=block` part of the link with 
+`&display=swap`.
+[Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 
 
-### Server-Rendering/Static Generation (e.g., Next.js)
+## Server-Rendering/Static Generation (e.g., Next.js)
 
 The `font` method can distinguish between being rendered on the client-sie or being rendered on 
 the server-side. If server-rendered and the environment is development, the `font` method still 
-collects all the fonts and their weights and styles, but it makes no attempt in generating a 
-stylesheet link nor attempt to insert a stylesheet `<link>` tag to the DOM.
+collects all the fonts and their weights, styles and variation settings, but it makes no 
+attempt in generating a stylesheet URL nor attempt to insert a stylesheet `<link>` tag to the 
+DOM on page load (But on hydration, such attempt is made).
 
-One thing you can do is to include the stylesheet `<link>` tag yourself. For example, here's 
-how it should be done in Next.js:
+One thing you can do solve this problem on page load, is to include the stylesheet `<link>` tag 
+yourself. For example, here's how it should be done in Next.js:
 
 `_app.tsx`
 
@@ -159,12 +170,12 @@ weights and styles) collected so far. **It needs to be included after every comp
 included.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
 
 This manually-added `<link>` tag is only important for the page loads. For hydration, the `font` 
-method works as expected. In development, it collects fonts, weights and styles and dynamically 
-inserts a stylesheet `<link>` tag to the DOM. In production, it doesn't do the collecting and 
-the dynamic insertion of `<link>` tags. You need to place the necessary `<link>` tags yourself 
-as discussed previously in the **Stylesheet Link Generation** section.
+method works as expected. In development, it collects fonts, weights, styles and variation settings, 
+and dynamically inserts a stylesheet `<link>` tag to the DOM. In production, it doesn't do the 
+collecting and the dynamic insertion of `<link>` tags. You need to place the necessary 
+`<link>` tags yourself as discussed previously in the **Development vs Production** section.
 
 
-### Test
+## Test
 
 The test for this package is a [separate repo](https://github.com/tjmora/g-font-test).

@@ -70,7 +70,7 @@ function pushUniqueEntry(
     let same = true;
     let keys = Object.keys(arr[i]);
     for (let j = 0, k = keys.length; j < k; j++) {
-      if (!arr[i][keys[j]] || arr[i][keys[j]] !== item[keys[j]]) {
+      if (!item[keys[j]] || arr[i][keys[j]] !== item[keys[j]]) {
         same = false;
         break;
       }
@@ -84,13 +84,18 @@ function pushUniqueEntry(
   return unique;
 }
 
-function expandCollectedFontsWithDefaults(fonts: CollectedFonts) {
+function putDefaultValuesToEntries(fonts: CollectedFonts) {
   for (const key in fonts) {
-    fonts[key].tags.forEach((tag) => {
-      fonts[key].entries.forEach((entry) => {
-        if (!entry[tag]) entry[tag] = DefaultValues[tag];
+    let newEntries: {[key: string]: number;}[] = []
+    fonts[key].entries.forEach((entry) => {
+      let newEntry: {[key: string]: number;} = {};
+      fonts[key].tags.forEach((tag) => {
+        if (!entry[tag]) newEntry[tag] = DefaultValues[tag];
+        else newEntry[tag] = entry[tag];
       });
+      pushUniqueEntry(newEntries, newEntry);
     });
+    fonts[key].entries = newEntries;
   }
 }
 
@@ -257,7 +262,7 @@ export default class GFont {
   }
 
   public buildLink(): string {
-    expandCollectedFontsWithDefaults(this.collector);
+    putDefaultValuesToEntries(this.collector);
     let href = "https://fonts.googleapis.com/css2?";
     for (const key in this.collector) {
       href += "family=" + key.replace(" ", "_");

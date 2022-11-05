@@ -1,23 +1,18 @@
-import { GFontName, IMapForWeights, IMapForVariations } from "./gFontInterfaces";
+import {
+  GFontName,
+  IMapForWeights,
+  IMapForVariations,
+} from "./gFontInterfaces";
 
 interface FontStyles {
-  tags: string[],
+  tags: string[];
   entries: {
     [key: string]: number;
-  }[]
+  }[];
 }
 
 interface CollectedFonts {
   [key: string]: FontStyles;
-}
-
-interface VariationI {
-  fontFamily?: string;
-  fontWeight?: number;
-  fontStyle?: string;
-  fontStretch?: number;
-  fontOpticalSizing?: number;
-  fontVariationSettings?: string;
 }
 
 const Weights: { [key: string]: number } = {
@@ -55,9 +50,9 @@ const DefaultValues: { [key: string]: number } = {
   slnt: 0,
   wdth: 100,
   wght: 400,
-}
+};
 
-function pushUniqueTag (arr: string[], newTag: string): boolean {
+function pushUniqueTag(arr: string[], newTag: string): boolean {
   for (let i = 0, l = arr.length; i < l; i++) {
     if (arr[i] === newTag) return false;
   }
@@ -66,13 +61,16 @@ function pushUniqueTag (arr: string[], newTag: string): boolean {
   return true;
 }
 
-function pushUniqueEntry (arr: {[key: string]: number}[], item: {[key: string]: number}): boolean {
+function pushUniqueEntry(
+  arr: { [key: string]: number }[],
+  item: { [key: string]: number }
+): boolean {
   let unique = true;
   for (let i = 0, l = arr.length; i < length; i++) {
     let same = true;
     let keys = Object.keys(arr[i]);
     for (let j = 0, k = keys.length; j < k; j++) {
-      if (!arr[i][keys[j]] || (arr[i][keys[j]] !== item[keys[j]])) {
+      if (!arr[i][keys[j]] || arr[i][keys[j]] !== item[keys[j]]) {
         same = false;
         break;
       }
@@ -88,12 +86,11 @@ function pushUniqueEntry (arr: {[key: string]: number}[], item: {[key: string]: 
 
 function expandCollectedFontsWithDefaults(fonts: CollectedFonts) {
   for (const key in fonts) {
-    fonts[key].tags.forEach(tag => {
-      fonts[key].entries.forEach(entry => {
-        if (!entry[tag])
-          entry[tag] = DefaultValues[tag];
-      })
-    })
+    fonts[key].tags.forEach((tag) => {
+      fonts[key].entries.forEach((entry) => {
+        if (!entry[tag]) entry[tag] = DefaultValues[tag];
+      });
+    });
   }
 }
 
@@ -119,10 +116,10 @@ function insertLinkTag(linkTagId: string) {
 function variationsToCss(variations?: string[]): string {
   let result = "";
   let subset: [string, string][] = [];
-  if(variations) {
-    variations.forEach(variation => {
+  if (variations) {
+    variations.forEach((variation) => {
       if (variation === "normal" || variation === "italic")
-        result += "font-style: " + variation + ";\n"
+        result += "font-style: " + variation + ";\n";
       else {
         let parts = variation.trim().split("=");
         switch (parts[0]) {
@@ -139,23 +136,25 @@ function variationsToCss(variations?: string[]): string {
             subset.push([parts[0], parts[1]]);
         }
       }
-    })
+    });
     if (subset.length) {
       result += "font-variation-settings: ";
       subset.forEach(([tag, value]) => {
         result += `"${tag}" ${value},`;
-      })
+      });
       result += ";\n";
     }
   }
   return result;
 }
 
-function variationsToObj(variations?: string[]): VariationI {
-  let result: VariationI = {};
+function variationsToObj(variations?: string[]): {
+  [key: string]: string | number;
+} {
+  let result: {[key: string]: string | number;} = {};
   let subset: [string, string][] = [];
-  if(variations) {
-    variations.forEach(variation => {
+  if (variations) {
+    variations.forEach((variation) => {
       if (variation === "normal" || variation === "italic")
         result["fontStyle"] = variation;
       else {
@@ -174,7 +173,7 @@ function variationsToObj(variations?: string[]): VariationI {
             subset.push([parts[0], parts[1]]);
         }
       }
-    })
+    });
     if (subset.length) {
       result["fontVariationSettings"] = subset.reduce((acc, cur) => {
         return acc + `"${cur[0]}" ${cur[1]},`;
@@ -218,12 +217,16 @@ export default class GFont {
     }, delay);
   }
 
-  private collectFont(name: string, weight?: number, variations: string[] = []): boolean {
+  private collectFont(
+    name: string,
+    weight?: number,
+    variations: string[] = []
+  ): boolean {
     let collectorIsChanged = false;
-    let entry: {[key: string]: number} = {};
+    let entry: { [key: string]: number } = {};
 
     if (!this.collector[name]) {
-      this.collector[name] = {tags: [], entries: []}
+      this.collector[name] = { tags: [], entries: [] };
       collectorIsChanged = true;
     }
 
@@ -233,20 +236,18 @@ export default class GFont {
     }
 
     let temp = false;
-    variations.forEach(variation => {
+    variations.forEach((variation) => {
       if (variation === "normal" || variation === "italic") {
         temp = pushUniqueTag(this.collector[name].tags, "ital");
         if (variation === "normal") entry["ital"] = 0;
         else entry["ital"] = 1;
-      }
-      else if (variation.match(/^\s*[a-zA-Z]+=[0-9]+(\.[0-9]+)?\s*$/)) {
+      } else if (variation.match(/^\s*[a-zA-Z]+=[0-9]+(\.[0-9]+)?\s*$/)) {
         let parts = variation.trim().split("=");
         temp = pushUniqueTag(this.collector[name].tags, parts[0]);
         entry[parts[0]] = parseFloat(parts[1]);
-      }
-      else
-        throw `The style variation "${variation}" for font ${name} has an invalid syntax.`
-    })
+      } else
+        throw `The style variation "${variation}" for font ${name} has an invalid syntax.`;
+    });
     if (!collectorIsChanged) collectorIsChanged = temp;
 
     temp = pushUniqueEntry(this.collector[name].entries, entry);
@@ -266,11 +267,9 @@ export default class GFont {
         for (let i = 0, l = this.collector[key].entries.length; i < l; i++) {
           for (let j = 0; j < tagsLength; j++) {
             href += this.collector[key].entries[i][this.collector[key].tags[j]];
-            if (j !== tagsLength - 1)
-              href += ",";
+            if (j !== tagsLength - 1) href += ",";
           }
-          if (i !== l - 1)
-            href += ";";
+          if (i !== l - 1) href += ";";
         }
       }
       href += "&";
@@ -286,7 +285,7 @@ export default class GFont {
     ...variations: string[]
   ): {
     css: string;
-    obj: VariationI;
+    obj: { [key: string]: string | number };
   } {
     let wght = -1;
     if (weight && typeof weight !== "number") {
@@ -305,21 +304,25 @@ export default class GFont {
         // true only in very first call to gFont for client-rendered components
         insertLinkTag(this.linkTagId);
 
-      let collectorIsChanged = this.collectFont(name, (weight ? wght : undefined), variations);
+      let collectorIsChanged = this.collectFont(
+        name,
+        weight ? wght : undefined,
+        variations
+      );
 
       if (!isServerRendered && collectorIsChanged) this.attemptProvideLink(8);
     }
 
     const css = `
       font-family: "${name}", ${fallback};
-      ${weight ? ("font-weight: " + weight + ";") : ""}
+      ${weight ? "font-weight: " + weight + ";" : ""}
       ${variationsToCss(variations)}
     `;
 
-    let obj: VariationI = {
+    let obj = {
       fontFamily: "'" + name + "', " + fallback,
       fontWeight: wght,
-      ...variationsToObj(variations)
+      ...variationsToObj(variations),
     };
 
     return {
@@ -332,10 +335,10 @@ export default class GFont {
     name: T,
     fallback: string,
     weight?: IMapForWeights[T],
-    ...variations: (IMapForVariations[T])[]
+    ...variations: IMapForVariations[T][]
   ): {
     css: string;
-    obj: VariationI;
+    obj: { [key: string]: string | number };
   } {
     return this.font_(name, fallback, weight, ...variations);
   }

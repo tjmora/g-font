@@ -9,6 +9,9 @@ interface FontStyles {
   entries: {
     [key: string]: number;
   }[];
+  entriesWithDefaults: {
+    [key: string]: number;
+  }[];
 }
 
 interface CollectedFonts {
@@ -84,32 +87,26 @@ function pushUniqueEntry(
   return unique;
 }
 
-function putDefaultValuesToEntries(fonts: CollectedFonts) {
+function generateEntriesWithDefaults(fonts: CollectedFonts) {
   for (const key in fonts) {
-    let newEntries: {[key: string]: number;}[] = []
+    fonts[key].entriesWithDefaults = [];
     fonts[key].entries.forEach((entry) => {
-      let newEntry: {[key: string]: number;} = {};
+      let entryWithDefaults: {[key: string]: number;} = {};
       fonts[key].tags.forEach((tag) => {
-        if (!entry[tag]) newEntry[tag] = DefaultValues[tag];
-        else newEntry[tag] = entry[tag];
+        if (!entry[tag]) entryWithDefaults[tag] = DefaultValues[tag];
+        else entryWithDefaults[tag] = entry[tag];
       });
-      pushUniqueEntry(newEntries, newEntry);
+      pushUniqueEntry(fonts[key].entriesWithDefaults, entryWithDefaults);
     });
-    newEntries.sort((a, b) => {
+    fonts[key].entriesWithDefaults.sort((a, b) => {
       let result = 0;
       for (let i = 0, l = fonts[key].tags.length; i < l; i++) {
-        if (a[fonts[key].tags[i]] < b[fonts[key].tags[i]]) {
-          result = -1;
+        result = a[fonts[key].tags[i]] - b[fonts[key].tags[i]];
+        if (result !== 0)
           break;
-        }
-        else if (a[fonts[key].tags[i]] > b[fonts[key].tags[i]]) {
-          result = 1;
-          break;
-        }
       }
       return result;
     })
-    fonts[key].entries = newEntries;
   }
 }
 
@@ -245,7 +242,7 @@ export default class GFont {
     let entry: { [key: string]: number } = {};
 
     if (!this.collector[name]) {
-      this.collector[name] = { tags: [], entries: [] };
+      this.collector[name] = { tags: [], entries: [], entriesWithDefaults: [] };
       collectorIsChanged = true;
     }
 
@@ -276,16 +273,16 @@ export default class GFont {
   }
 
   public buildLink(): string {
-    putDefaultValuesToEntries(this.collector);
+    generateEntriesWithDefaults(this.collector);
     let href = "https://fonts.googleapis.com/css2?";
     for (const key in this.collector) {
       href += "family=" + key.replace(" ", "_");
       const tagsLength = this.collector[key].tags.length;
       if (tagsLength) {
         href += ":" + this.collector[key].tags.join(",") + "@";
-        for (let i = 0, l = this.collector[key].entries.length; i < l; i++) {
+        for (let i = 0, l = this.collector[key].entriesWithDefaults.length; i < l; i++) {
           for (let j = 0; j < tagsLength; j++) {
-            href += this.collector[key].entries[i][this.collector[key].tags[j]];
+            href += this.collector[key].entriesWithDefaults[i][this.collector[key].tags[j]];
             if (j !== tagsLength - 1) href += ",";
           }
           if (i !== l - 1) href += ";";
@@ -334,7 +331,7 @@ export default class GFont {
 
     const css = `
       font-family: "${name}", ${fallback};
-      ${weight ? "font-weight: " + weight + ";" : ""}
+      ${weight ? "font-weight: " + wght + ";" : ""}
       ${variationsToCss(variations)}
     `;
 

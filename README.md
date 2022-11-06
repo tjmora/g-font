@@ -102,8 +102,8 @@ The `font` method takes the following arguments:
 * **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
 * **variation** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt:-5"` if the font has a slant axis, or `"wdth:120.0"` if the font has a width axis, or other variation settings possible for a font.
 
-In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on the name, 
-weight or variation parameter to expose all the possible values for the parameter.
+> **_TIP:_** In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on 
+> the name, weight or variation parameter to expose all the possible values for the parameter.
 
 > **_NOTE:_** The `font_` method (with trailing underscore) is the non-typed version of the 
 > `font` method. If you're sure you're using valid values but the `font` method keeps on 
@@ -133,8 +133,8 @@ then add all the necessary stylesheet `<link>` tags to your App or Document file
 This is the only pragmatic way of speeding up the load up times of your chosen fonts in 
 production.
 
-To generate the Google Font URL that you will need in production, you don't need to generate 
-it using Google Fonts' website. You can instead do the following:
+To generate the Google Fonts stylesheet URL that you need in production, you don't need to 
+generate it using Google Fonts' website. You can instead do the following:
 
 1. Place the following `link` tags somewhere in your app, document or layout file/component 
 (within  `<head>` or `<Head>` tags):
@@ -149,14 +149,15 @@ it using Google Fonts' website. You can instead do the following:
 hydration events lead up to the collection of all the fonts your website needs, and making 
 sure you're not refreshing the tab. (For some static-generating frameworks like Next.js, you 
 will need to go to all the routes that has their own Google fonts so those fonts can 
-be collected. In Next.js, the <Link> elements actually lead to hydration, not new page loads 
-despite the route change in the address bar. The hydration makes the font collection possible).
+be collected. In Next.js, the `<Link>` elements actually lead up to hydration, not new page 
+loads despite the route change in the address bar. The hydration makes the font collection 
+possible).
 
 3. Once you're confident all your needed fonts are already collected in the background, 
 bring up the browser's inspection tool and look for the 
 `<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag within your document's head. 
 Copy the generated value inside the `href` attribute, and replace the `CHANGE_THIS` href value 
-from step no. 1 with it. You can opt to replace the `&display=block` part of the link with 
+from step no. 1 with it. You may want to replace the `&display=block` part of the link with 
 `&display=swap`.
 [Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 

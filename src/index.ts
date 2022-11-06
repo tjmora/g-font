@@ -172,7 +172,7 @@ function variationsToCss(variations?: string[]): string {
             result += "font-style: " + (parts[1] === "1" ? "italic" : "normal") + ";";
             break;
           case "slnt":
-            result += "font-style: oblique " + parts[1] + "deg;\n";
+            result += "font-style: oblique " + (-parseInt(parts[1])) + "deg;\n";
             break;
           case "wdth":
             result += "font-stretch: " + parts[1] + "%;\n";
@@ -190,7 +190,7 @@ function variationsToCss(variations?: string[]): string {
       subset.forEach(([tag, value]) => {
         result += `"${tag}" ${value},`;
       });
-      result += ";\n";
+      result = result.slice(0, -1) + ";\n";
     }
   }
   return result;
@@ -212,13 +212,13 @@ function variationsToObj(variations?: string[]): {
               result["fontStyle"] = parts[1] === "1" ? "italic" : "normal";
             break;
           case "slnt":
-            result["fontStyle"] = "oblique " + parts[1] + "deg";
+            result["fontStyle"] = "oblique " + (-parseInt(parts[1])) + "deg";
             break;
           case "wdth":
             result["fontStretch"] = parseFloat(parts[1]) + "%";
             break;
           case "wght":
-            result["fontWeight"] = parseFloat(parts[1]);
+            result["fontWeight"] = parseInt(parts[1]);
             break;
           default:
             subset.push([parts[0], parts[1]]);
@@ -229,6 +229,7 @@ function variationsToObj(variations?: string[]): {
       result["fontVariationSettings"] = subset.reduce((acc, cur) => {
         return acc + `"${cur[0]}" ${cur[1]},`;
       }, "");
+      result["fontVariationSettings"] = result["fontVariationSettings"].slice(0, -1);
     }
   }
   return result;

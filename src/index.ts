@@ -31,6 +31,11 @@ const Weights: { [key: string]: number } = {
 };
 
 const DefaultValues: { [key: string]: number } = {
+  ital: 0,
+  opsz: 14,
+  slnt: 0,
+  wdth: 100,
+  wght: 400,
   CASL: 0,
   CRSV: 0.5,
   EDPT: 100,
@@ -48,20 +53,28 @@ const DefaultValues: { [key: string]: number } = {
   YTFI: 600,
   YTLC: 0,
   YTUC: 725,
-  ital: 0,
-  opsz: 14,
-  slnt: 0,
-  wdth: 100,
-  wght: 400,
 };
 
-function pushUniqueTag(arr: string[], newTag: string): boolean {
+function pushUniqueTag(arr: string[], newTag: string): [boolean, boolean] {
+  if (DefaultValues[newTag] === undefined) {
+    console.log(
+      `@tjmora/g-font:: Warning: The style variation setting "${newTag}" has no undocumented default value. It was ignored.`
+    );
+    return [false, true];
+  }
   for (let i = 0, l = arr.length; i < l; i++) {
-    if (arr[i] === newTag) return false;
+    if (arr[i] === newTag) return [false, false];
   }
   arr.push(newTag);
-  arr.sort((a, b) => a.localeCompare(b)); // alphabetize
-  return true;
+  arr.sort((a, b) => {
+    let a0 = a.charCodeAt(0),
+      b0 = b.charCodeAt(0);
+    if ((a0 <= 90 && b0 <= 90) || (a0 >=97 && b0 >= 97))
+      return a.localeCompare(b);
+    else
+      return b0 - a0;
+  });
+  return [true, false];
 }
 
 function areKeysTheSame(tags1: string[], tags2: string[]): boolean {
@@ -109,7 +122,8 @@ function generateEntriesWithDefaults(fonts: CollectedFonts) {
     fonts[key].entries.forEach((entry) => {
       let entryWithDefaults: { [key: string]: number } = {};
       fonts[key].tags.forEach((tag) => {
-        if (entry[tag] === undefined) entryWithDefaults[tag] = DefaultValues[tag];
+        if (entry[tag] === undefined)
+          entryWithDefaults[tag] = DefaultValues[tag];
         else entryWithDefaults[tag] = entry[tag];
       });
       pushUniqueEntry(fonts[key].entriesWithDefaults, entryWithDefaults);
@@ -152,7 +166,7 @@ function variationsToCss(variations?: string[]): string {
       if (variation === "normal" || variation === "italic")
         result += "font-style: " + variation + ";\n";
       else {
-        let parts = variation.trim().split("=");
+        let parts = variation.trim().split(":");
         switch (parts[0]) {
           case "slnt":
             result += "font-style: oblique " + parts[1] + "deg;\n";
@@ -189,7 +203,7 @@ function variationsToObj(variations?: string[]): {
       if (variation === "normal" || variation === "italic")
         result["fontStyle"] = variation;
       else {
-        let parts = variation.trim().split("=");
+        let parts = variation.trim().split(":");
         switch (parts[0]) {
           case "slnt":
             result["fontStyle"] = "oblique " + parts[1] + "deg";
@@ -262,22 +276,26 @@ export default class GFont {
     }
 
     if (weight !== undefined) {
-      collectorIsChanged = pushUniqueTag(this.collector[name].tags, "wght");
+      [collectorIsChanged, ] = pushUniqueTag(this.collector[name].tags, "wght");
       entry["wght"] = weight;
     }
 
     let temp = false;
     variations.forEach((variation) => {
       if (variation === "normal" || variation === "italic") {
-        temp = pushUniqueTag(this.collector[name].tags, "ital");
+        [temp, ] = pushUniqueTag(this.collector[name].tags, "ital");
         if (variation === "normal") entry["ital"] = 0;
         else entry["ital"] = 1;
-      } else if (variation.match(/^\s*[a-zA-Z]+=-?[0-9]+(\.[0-9]+)?\s*$/)) {
-        let parts = variation.trim().split("=");
-        temp = pushUniqueTag(this.collector[name].tags, parts[0]);
-        entry[parts[0]] = parseFloat(parts[1]);
+      } else if (variation.match(/^\s*[a-zA-Z]+:-?[0-9]+(\.[0-9]+)?\s*$/)) {
+        let parts = variation.trim().split(":");
+        let err = false;
+        [temp, err] = pushUniqueTag(this.collector[name].tags, parts[0]);
+        if (!err)
+          entry[parts[0]] = parseFloat(parts[1]);
       } else
-        console.log(`@tjmora/g-font:: Warning: The style variation "${variation}" for font ${name} has an invalid syntax.`);
+        console.log(
+          `@tjmora/g-font:: Warning: The style variation "${variation}" for font ${name} has an invalid value or syntax.`
+        );
     });
     if (!collectorIsChanged) collectorIsChanged = temp;
 

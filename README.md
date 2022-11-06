@@ -3,9 +3,8 @@
 This will help you try different Google Fonts without needing to generate stylesheet URLs 
 every time you change your fonts. The stylesheet URLs are automatically-generated while 
 on you're on a development environment (A little more steps are needed for production 
-environment). If used with Typescript, your code editor's IntelliSense will limit you to 
-valid font names, valid weights and styles for each font, and valid variation setting for 
-each font. 
+environment). If used with Typescript, your code editor's code completion system can guide you 
+to valid font names, valid weights, valid styles and valid variation settings for each font.
 
 
 ## Installation
@@ -56,7 +55,7 @@ export default function MyComponent({children}: {children?: React.ReactNode}) {
   return (
     <StyledDiv>
       {children}
-      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "750", "slnt=-10").obj}}>Some Link</a>
+      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "750", "slnt:-10", "wdth:130.0").obj}}>Some Link</a>
     <StyledDiv>
   )
 }
@@ -67,10 +66,9 @@ The `font` method takes the following arguments:
 * **name** - The name of the font.
 * **fallback** - The fallback font in case the Google font doesn't load.
 * **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
-* **variantion** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt=-30"` if the font has a slant axis, or `"wdth=120.0"` if the font has a width axis, or other variation settings possible for a font.
+* **variation** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt:-5"` if the font has a slant axis, or `"wdth:120.0"` if the font has a width axis, or other variation settings possible for a font.
 
-If you use Typescript, the **intellisense** of your code editor may be able to 
-**limit the variants** you can enter based on what is actually possible for that font. 
+In VSCode, hit `CTRL` + `SPACE` when the cursor is on the name, weight or variation parameter to expose all the possible values for the parameter.
 
 The `font` method has two types of return values:
 
@@ -80,12 +78,13 @@ The `font` method has two types of return values:
 
 ## `font` vs `font_` methods
 
-The `font` method, in Typescript, enforces the custom font and value types which were created 
-to help IntelliSense recommend valid values to you.
+The `font` method, in Typescript, enforces the custom font/value types which were created 
+to help your code editor's code completion system recommend valid values to you.
 
-The `font_` method, do not enforce those custom font and value types. Those custom font and 
-value types aren't perfect, and the `font` method may sometimes be wrongly linted as erroneous. 
-Simply add an underscore to the method to disable the enforcing of those types. 
+The `font_` method, do not enforce those custom font/value types. Those custom types aren't 
+perfect, and the `font` method may sometimes be wrongly linted as erroneous and won't compile. 
+If you're sure the parameters you provided are valid despite that, simply add an underscore to 
+the method to disable the enforcing of those types. 
 
 
 ## Development vs Production

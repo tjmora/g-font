@@ -68,7 +68,8 @@ The `font` method takes the following arguments:
 * **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
 * **variation** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt:-5"` if the font has a slant axis, or `"wdth:120.0"` if the font has a width axis, or other variation settings possible for a font.
 
-In VSCode, hit `CTRL` + `SPACE` when the cursor is on the name, weight or variation parameter to expose all the possible values for the parameter.
+In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on the name, 
+weight or variation parameter to expose all the possible values for the parameter.
 
 The `font` method has two types of return values:
 
@@ -89,41 +90,42 @@ the method to disable the enforcing of those types.
 
 ## Development vs Production
 
-In our context file **gfont.ts**, we constructed a new GFont instance by passing a boolean, 
-whether the `process.env.NODE_ENV === "development"` is true or not. We do this because the 
-`font` method is supposed to behave differently between the developmental and production 
+The `font` method is supposed to behave differently between the developmental and production 
 environments.
 
-If **true** is passed to `new GFont(...)`, the `font` method automatically collects all the 
-fonts and their weights, styles and variation settings, and automatically inserts a 
-stylesheet `<link>` tag with an automatically-generated href to the DOM. This will allow you 
-to quickly see how the different fonts you try get rendered by the browser. The fonts load 
-slowly at page load and at hydration. This slow font-rendering behavior is really only 
-tolerable in a developmental environment.
+In development, **true** is passed to `new GFont(...)`. The `font` method automatically 
+collects all the fonts and their weights, styles and variation settings, and automatically 
+inserts a stylesheet `<link>` tag with an automatically-generated href to the DOM. This will 
+allow you to quickly see how the different fonts you try get rendered by the browser. The 
+fonts load a bit slow, and they may flicker, at page load and at hydration. This slow 
+font-rendering behavior is really only tolerable in a developmental environment.
 
-If **false** is passed to `new GFont(...)`, the `font` method still returns the `.css` string of 
-valid css syntax, and the `.obj` object of valid inline style prop values. So you don't need to 
-refactor those `font` method calls into native css or inline style props. However, there will be 
-no attempt in collecting the fonts and their weights, styles and variation settings, and 
-no attempt as well in dynamically inserting any stylesheet `<link>` tag to the DOM. You are 
-supposed to collect your final selection of fonts on your own and then add all the necessary 
-stylesheet `<link>` tags to your App or Document file/component. This is the only pragmatic way 
-of speeding up the load up times of your chosen fonts in production.
+In production, **false** is passed to `new GFont(...)`. The `font` method still returns the 
+`.css` string of valid css syntax, and the `.obj` object of valid inline style prop values. 
+So you don't need to refactor those `font` method calls into native css or inline style props. 
+However, there will be no attempt in collecting the fonts and their weights, styles and 
+variation settings, and no attempt as well in dynamically inserting any stylesheet `<link>` 
+tag to the DOM. You are supposed to collect your final selection of fonts on your own and 
+then add all the necessary stylesheet `<link>` tags to your App or Document file/component. 
+This is the only pragmatic way of speeding up the load up times of your chosen fonts in 
+production.
 
-You don't need to generate the stylesheet URL using Google Fonts' website, you can do the 
-following instead:
+To generate the Google Font URL that you will need in production, you don't need to generate 
+it using Google Fonts' website. You can instead do the following:
 
 1. Place the following `link` tags somewhere in your app, document or layout file/component (within  `<head>` or `<Head>` tags):
 
 ```
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
-<link href="CHANGE_THIS" rel="stylesheet">
+<link href="CHANGE_THIS" rel="stylesheet" />
 ```
 
 2. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
-sure you're not refreshing the tab.
+sure you're not refreshing the tab. (For static-generated websites, you will need to visit 
+all the routes in your website that has its own fonts, without refreshing the tab. The 
+routing of these websites rely on hydration, not new page loads.)
 
 3. Bring up the browser's inspection tool and look for the 
 `<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your document's head. 
@@ -141,8 +143,8 @@ collects all the fonts and their weights, styles and variation settings, but it 
 attempt in generating a stylesheet URL nor attempt to insert a stylesheet `<link>` tag to the 
 DOM on page load (But on hydration, such attempt is made).
 
-One thing you can do solve this problem on page load, is to include the stylesheet `<link>` tag 
-yourself. For example, here's how it should be done in Next.js:
+One thing you can do to solve this problem on page load, is to include the stylesheet `<link>` 
+tag yourself. For example, here's how it should be done in Next.js:
 
 `_app.tsx`
 
@@ -164,16 +166,28 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-The `g.buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
-weights and styles) collected so far. **It needs to be included after every component is already 
-included.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` tag.
+The `buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
+weights and styles) collected so far. **It needs to be included after every component is 
+already included.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` 
+tag.
 
-This manually-added `<link>` tag is only important for the page loads. For hydration, the `font` 
-method works as expected. In development, it collects fonts, weights, styles and variation settings, 
-and dynamically inserts a stylesheet `<link>` tag to the DOM. In production, it doesn't do the 
-collecting and the dynamic insertion of `<link>` tags. You need to place the necessary 
-`<link>` tags yourself as discussed previously in the **Development vs Production** section.
+This manually-added `<link>` tag is only important for the page loads. For hydration, the 
+`font` method works as expected. In development, it collects fonts, weights, styles and 
+variation settings, and dynamically inserts a stylesheet `<link>` tag to the DOM. In production, 
+it doesn't do the collecting and the dynamic insertion of `<link>` tags. You need to place the 
+necessary `<link>` tags yourself as discussed previously in the later part of the 
+**Development vs Production** section.
 
+
+## Issues/Contributing
+
+Before you create any issue or make a pull request, please consider the following:
+
+1. The weight parameter for the `font` and `font_` will only be of type string for the meantime, even for the numeric values. This makes the custom font/value types simpler and the code editor will have easier time generating the set of valid values.
+
+2. Only the variation settings or axes included [here](https://fonts.google.com/variablefonts#axis-definitions) are supported as these have documented default values. A few Google fonts have exotic variation settings and this library chose to ignore those axes.
+
+3. Some fonts from this [repo](https://github.com/google/fonts) have missing METADATA files. Those fonts are not even present in the Google Fonts website that this library also chose to ignore those fonts.
 
 ## Test
 

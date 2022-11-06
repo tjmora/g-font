@@ -272,12 +272,12 @@ export default class GFont {
         temp = pushUniqueTag(this.collector[name].tags, "ital");
         if (variation === "normal") entry["ital"] = 0;
         else entry["ital"] = 1;
-      } else if (variation.match(/^\s*[a-zA-Z]+=[0-9]+(\.[0-9]+)?\s*$/)) {
+      } else if (variation.match(/^\s*[a-zA-Z]+=-?[0-9]+(\.[0-9]+)?\s*$/)) {
         let parts = variation.trim().split("=");
         temp = pushUniqueTag(this.collector[name].tags, parts[0]);
         entry[parts[0]] = parseFloat(parts[1]);
       } else
-        throw `The style variation "${variation}" for font ${name} has an invalid syntax.`;
+        console.log(`@tjmora/g-font:: Warning: The style variation "${variation}" for font ${name} has an invalid syntax.`);
     });
     if (!collectorIsChanged) collectorIsChanged = temp;
 

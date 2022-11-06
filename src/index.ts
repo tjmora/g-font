@@ -309,7 +309,7 @@ export default class GFont {
     generateEntriesWithDefaults(this.collector);
     let href = "https://fonts.googleapis.com/css2?";
     for (const key in this.collector) {
-      href += "family=" + key.replace(" ", "_");
+      href += "family=" + key.replace(" ", "+");
       const tagsLength = this.collector[key].tags.length;
       if (tagsLength) {
         href += ":" + this.collector[key].tags.join(",") + "@";

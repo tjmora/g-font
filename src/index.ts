@@ -5,10 +5,15 @@ import {
 } from "./gFontInterfaces";
 
 interface FontStyles {
+  // We need to keep track of all the tags used in all entries
   tags: string[];
+
+  // Each entry has its own set of tags
   entries: {
     [key: string]: number;
   }[];
+
+  // When the Google Font API URL is to be built, we need entries with default values.
   entriesWithDefaults: {
     [key: string]: number;
   }[];
@@ -56,6 +61,7 @@ const DefaultValues: { [key: string]: number } = {
 };
 
 function pushUniqueTag(arr: string[], newTag: string): [boolean, boolean] {
+  // returns [success, error]
   if (DefaultValues[newTag] === undefined) {
     console.log(
       `@tjmora/g-font:: Warning: The style variation setting "${newTag}" has no undocumented default value. It was ignored.`
@@ -67,12 +73,12 @@ function pushUniqueTag(arr: string[], newTag: string): [boolean, boolean] {
   }
   arr.push(newTag);
   arr.sort((a, b) => {
+    // sorts alphabetized but all lowercase comes before all uppercase (Google Font's css2 api requirement)
     let a0 = a.charCodeAt(0),
       b0 = b.charCodeAt(0);
-    if ((a0 <= 90 && b0 <= 90) || (a0 >=97 && b0 >= 97))
+    if ((a0 <= 90 && b0 <= 90) || (a0 >= 97 && b0 >= 97))
       return a.localeCompare(b);
-    else
-      return b0 - a0;
+    else return b0 - a0;
   });
   return [true, false];
 }
@@ -129,6 +135,7 @@ function generateEntriesWithDefaults(fonts: CollectedFonts) {
       pushUniqueEntry(fonts[key].entriesWithDefaults, entryWithDefaults);
     });
     fonts[key].entriesWithDefaults.sort((a, b) => {
+      // Google Font's css2 api requires sorted tuples of values
       let result = 0;
       for (let i = 0, l = fonts[key].tags.length; i < l; i++) {
         result = a[fonts[key].tags[i]] - b[fonts[key].tags[i]];
@@ -169,10 +176,12 @@ function variationsToCss(variations?: string[]): string {
         let parts = variation.trim().split(":");
         switch (parts[0]) {
           case "ital":
-            result += "font-style: " + (parts[1] === "1" ? "italic" : "normal") + ";";
+            result +=
+              "font-style: " + (parts[1] === "1" ? "italic" : "normal") + ";";
             break;
           case "slnt":
-            result += "font-style: oblique " + (-parseInt(parts[1])) + "deg;\n";
+            // slnt and oblique use opposite signs
+            result += "font-style: oblique " + -parseInt(parts[1]) + "deg;\n";
             break;
           case "wdth":
             result += "font-stretch: " + parts[1] + "%;\n";
@@ -190,6 +199,8 @@ function variationsToCss(variations?: string[]): string {
       subset.forEach(([tag, value]) => {
         result += `"${tag}" ${value},`;
       });
+      
+      // remove trailing comma
       result = result.slice(0, -1) + ";\n";
     }
   }
@@ -209,10 +220,11 @@ function variationsToObj(variations?: string[]): {
         let parts = variation.trim().split(":");
         switch (parts[0]) {
           case "ital":
-              result["fontStyle"] = parts[1] === "1" ? "italic" : "normal";
+            result["fontStyle"] = parts[1] === "1" ? "italic" : "normal";
             break;
           case "slnt":
-            result["fontStyle"] = "oblique " + (-parseInt(parts[1])) + "deg";
+            // slnt and oblique use opposite signs
+            result["fontStyle"] = "oblique " + -parseInt(parts[1]) + "deg";
             break;
           case "wdth":
             result["fontStretch"] = parseFloat(parts[1]) + "%";
@@ -229,7 +241,12 @@ function variationsToObj(variations?: string[]): {
       result["fontVariationSettings"] = subset.reduce((acc, cur) => {
         return acc + `"${cur[0]}" ${cur[1]},`;
       }, "");
-      result["fontVariationSettings"] = result["fontVariationSettings"].slice(0, -1);
+      
+      // slice is for removing trailing comma
+      result["fontVariationSettings"] = result["fontVariationSettings"].slice(
+        0,
+        -1
+      );
     }
   }
   return result;
@@ -247,13 +264,14 @@ export default class GFont {
   constructor(cond: boolean) {
     this.isCollecting = cond;
     this.linkTagId =
+      // add random letters to our id
       "tjmora-g-font-" + (Math.random() + 1).toString(36).substring(7);
   }
 
   private attemptProvideLink(delay: number) {
+    // The lock is to minimize the number of times that the style link tag's href
+    // is dynamically changed in client-rendered components
     let lock: number = ++this.latestLock;
-    /* The lock is to minimize the number of times that the style link tag's href
-     * is dynamically changed in client-rendered components. */
 
     setTimeout(() => {
       if (lock === this.latestLock) {
@@ -262,9 +280,11 @@ export default class GFont {
         ) as HTMLLinkElement;
         if (typeof linkTag !== "undefined") {
           linkTag!.href = this.buildLink();
-        } else this.attemptProvideLink(delay * 2);
-        /* delay more to wait for linkTag's creation,
-         * also fails to recursive exponential delaying */
+        }
+
+        // delay more to wait for linkTag's creation,
+        // also fails to recursive exponential delaying
+        else this.attemptProvideLink(delay * 2);
       }
     }, delay);
   }
@@ -283,22 +303,21 @@ export default class GFont {
     }
 
     if (weight !== undefined) {
-      [collectorIsChanged, ] = pushUniqueTag(this.collector[name].tags, "wght");
+      [collectorIsChanged] = pushUniqueTag(this.collector[name].tags, "wght");
       entry["wght"] = weight;
     }
 
     let temp = false;
     variations.forEach((variation) => {
       if (variation === "normal" || variation === "italic") {
-        [temp, ] = pushUniqueTag(this.collector[name].tags, "ital");
+        [temp] = pushUniqueTag(this.collector[name].tags, "ital");
         if (variation === "normal") entry["ital"] = 0;
         else entry["ital"] = 1;
       } else if (variation.match(/^\s*[a-zA-Z]+:-?[0-9]+(\.[0-9]+)?\s*$/)) {
         let parts = variation.trim().split(":");
         let err = false;
         [temp, err] = pushUniqueTag(this.collector[name].tags, parts[0]);
-        if (!err)
-          entry[parts[0]] = parseFloat(parts[1]);
+        if (!err) entry[parts[0]] = parseFloat(parts[1]);
       } else
         console.log(
           `@tjmora/g-font:: Warning: The style variation "${variation}" for font ${name} has an invalid value or syntax.`

@@ -16,6 +16,8 @@ npm i @tjmora/g-font
 
 ## Usage
 
+### Context
+
 First we create a context. Somewhere in your project, create a **gfont.ts** or **gfont.js** 
 file.
 
@@ -32,34 +34,66 @@ Next, we import this context to our component.
 
 ```typescript
 import g from "./gfont";
-import styled from "styled-components";
+```
 
-const StyledDiv = styled.div`
-  display: block;
-  width: 100%;
+### Use in Inline Style Props
+
+Use `font(...).obj` which returns an object of camelCased style props. Make sure to 
+spread the props using the `...` operator.
+
+```tsx
+export default function SomeComponent () {
+  return (
+    <>
+      <h1 style={{
+        fontSize: "1.8rem",
+        ...g.font("Roboto Flex", "Verdana, sans-serif", "semibold", "slnt:-10", "wdth:130.0").obj
+      }}>
+        Some Headline
+      </h1>
+      <blockquote style={{
+        paddingLeft: "1rem",
+        borderLeft: "solid 5px darkgreen",
+        ...g.font("Lora", "Georgia, serif", "500", "italic").obj 
+      }}>
+        Some quote by Einstein.
+      </blockquote>
+      <p style={{
+        fontSize: "1rem",
+        ...${g.font("Roboto", "Arial, sans-serif").obj
+      }}>
+        Some paragraph
+      </p>
+    </>
+  )
+}
+```
+
+### Use in CSS-in-JS
+
+Use `font(...).css` which returns a string of valid syntax of CSS rules.
+
+```typescript
+import styled from "styled-components"
+
+const SomeComponent = styled.div`
   h1 {
     font-size: 1.8rem;
-    ${g.font("Raleway", "Verdana, sans-serif", "semibold").css}
+    ${g.font("Roboto Flex", "Verdana, sans-serif", "semibold", "slnt:-10", "wdth:130.0").css}
+  }
+  blockquote {
+    padding-left: 1rem;
+    border-left: solid 5px darkgreen;
+    ${g.font("Lora", "Georgia, serif", "500", "italic").css}
   }
   p {
     font-size: 1rem;
     ${g.font("Roboto", "Arial, sans-serif").css}
   }
-  blockquote {
-    font-size: 1.2rem;
-    ${g.font("Lora", "Georgia, serif", "500", "italic").css}
-  }
 `;
-
-export default function MyComponent({children}: {children?: React.ReactNode}) {
-  return (
-    <StyledDiv>
-      {children}
-      <a href="/" style={{...g.font("Roboto Flex", "Arial, sans-serif", "750", "slnt:-10", "wdth:130.0").obj}}>Some Link</a>
-    <StyledDiv>
-  )
-}
 ```
+
+### `font` method parameters
 
 The `font` method takes the following arguments:
 
@@ -71,21 +105,10 @@ The `font` method takes the following arguments:
 In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on the name, 
 weight or variation parameter to expose all the possible values for the parameter.
 
-The `font` method has two types of return values:
-
-* `font(...).css` is a string formatted in a valid css syntax.
-* `font(...).obj` is an object with camelCased style props and their values.
-
-
-## `font` vs `font_` methods
-
-The `font` method, in Typescript, enforces the custom font/value types which were created 
-to help your code editor's code completion system recommend valid values to you.
-
-The `font_` method, do not enforce those custom font/value types. Those custom types aren't 
-perfect, and the `font` method may sometimes be wrongly linted as erroneous and won't compile. 
-If you're sure the parameters you provided are valid despite that, simply add an underscore to 
-the method to disable the enforcing of those types. 
+> **_NOTE:_** The `font_` method (with trailing underscore) is the non-typed version of the 
+> `font` method. If you're sure you're using valid values but the `font` method keeps on 
+> putting red squiggly lines under those values or if Typescript fails to compile your values, 
+> try adding un underscore to the method you're using. 
 
 
 ## Development vs Production
@@ -113,7 +136,8 @@ production.
 To generate the Google Font URL that you will need in production, you don't need to generate 
 it using Google Fonts' website. You can instead do the following:
 
-1. Place the following `link` tags somewhere in your app, document or layout file/component (within  `<head>` or `<Head>` tags):
+1. Place the following `link` tags somewhere in your app, document or layout file/component 
+(within  `<head>` or `<Head>` tags):
 
 ```
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -123,12 +147,14 @@ it using Google Fonts' website. You can instead do the following:
 
 2. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
-sure you're not refreshing the tab. (For static-generated websites, you will need to visit 
-all the routes in your website that has its own fonts, without refreshing the tab. The 
-routing of these websites rely on hydration, not new page loads.)
+sure you're not refreshing the tab. (For some static-generating frameworks like Next.js, you 
+will need to go to all the routes that has their own Google fonts so those fonts can 
+be collected. In Next.js, the <Link> elements actually lead to hydration, not new page loads 
+despite the route change in the address bar. The hydration makes the font collection possible).
 
-3. Bring up the browser's inspection tool and look for the 
-`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag in your document's head. 
+3. Once you're confident all your needed fonts are already collected in the background, 
+bring up the browser's inspection tool and look for the 
+`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag within your document's head. 
 Copy the generated value inside the `href` attribute, and replace the `CHANGE_THIS` href value 
 from step no. 1 with it. You can opt to replace the `&display=block` part of the link with 
 `&display=swap`.
@@ -143,12 +169,12 @@ collects all the fonts and their weights, styles and variation settings, but it 
 attempt in generating a stylesheet URL nor attempt to insert a stylesheet `<link>` tag to the 
 DOM on page load (But on hydration, such attempt is made).
 
-One thing you can do to solve this problem on page load, is to include the stylesheet `<link>` 
+One thing you can do to solve this problem on page load is to include the stylesheet `<link>` 
 tag yourself. For example, here's how it should be done in Next.js:
 
-`_app.tsx`
+In _app.tsx:
 
-```typescript
+```tsx
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -167,9 +193,11 @@ export default function App({ Component, pageProps }: AppProps) {
 ```
 
 The `buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
-weights and styles) collected so far. **It needs to be included after every component is 
-already included.** That's why we placed the `<Head>` and `<link>` tags after the `<Component>` 
-tag.
+weights and styles) collected so far.
+
+> **_WARNING:_** The `buildLink()` must execute only after all other components of your app 
+> is already included. That's why we placed the `<Head>` and `<link>` tags after the 
+> `<Component>` tag in the example code above.
 
 This manually-added `<link>` tag is only important for the page loads. For hydration, the 
 `font` method works as expected. In development, it collects fonts, weights, styles and 
@@ -183,11 +211,17 @@ necessary `<link>` tags yourself as discussed previously in the later part of th
 
 Before you create any issue or make a pull request, please consider the following:
 
-1. The weight parameter for the `font` and `font_` will only be of type string for the meantime, even for the numeric values. This makes the custom font/value types simpler and the code editor will have easier time generating the set of valid values.
+1. The weight parameter for the `font` and `font_` will only be of type string for the 
+meantime, even for the numeric values. This makes the custom font/value types simpler and 
+the code editor will have easier time generating the set of valid values.
 
-2. Only the variation settings or axes included [here](https://fonts.google.com/variablefonts#axis-definitions) are supported as these have documented default values. A few Google fonts have exotic variation settings and this library chose to ignore those axes.
+2. Only the variation settings or axes included [here](https://fonts.google.com/variablefonts#axis-definitions) 
+are supported as these have documented default values. A few Google fonts have exotic 
+variation settings but this library chose to ignore those axes.
 
-3. Some fonts from this [repo](https://github.com/google/fonts) have missing METADATA files. Those fonts are not even present in the Google Fonts website that this library also chose to ignore those fonts.
+3. Some fonts from this [repo](https://github.com/google/fonts) have missing METADATA files. 
+Those fonts are not even present in the Google Fonts website so this library also chose to 
+ignore those fonts.
 
 ## Test
 

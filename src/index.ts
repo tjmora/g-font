@@ -168,14 +168,17 @@ function variationsToCss(variations?: string[]): string {
       else {
         let parts = variation.trim().split(":");
         switch (parts[0]) {
+          case "ital":
+            result += "font-style: " + (parts[1] === "1" ? "italic" : "normal") + ";";
+            break;
           case "slnt":
             result += "font-style: oblique " + parts[1] + "deg;\n";
             break;
           case "wdth":
-            result += "font-stretch: " + parts[1] + ";\n";
+            result += "font-stretch: " + parts[1] + "%;\n";
             break;
-          case "opsz":
-            result += "font-optical-sizing: " + parts[1] + ";\n";
+          case "wght":
+            result += "font-weight: " + parts[1] + ";\n";
             break;
           default:
             subset.push([parts[0], parts[1]]);
@@ -205,14 +208,17 @@ function variationsToObj(variations?: string[]): {
       else {
         let parts = variation.trim().split(":");
         switch (parts[0]) {
+          case "ital":
+              result["fontStyle"] = parts[1] === "1" ? "italic" : "normal";
+            break;
           case "slnt":
             result["fontStyle"] = "oblique " + parts[1] + "deg";
             break;
           case "wdth":
-            result["fontStretch"] = parseFloat(parts[1]);
+            result["fontStretch"] = parseFloat(parts[1]) + "%";
             break;
-          case "opsz":
-            result["fontOpticalSizing"] = parseFloat(parts[1]);
+          case "wght":
+            result["fontWeight"] = parseFloat(parts[1]);
             break;
           default:
             subset.push([parts[0], parts[1]]);

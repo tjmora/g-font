@@ -81,7 +81,7 @@ function pushUniqueEntry(
   newEntry: { [key: string]: number }
 ): boolean {
   let unique = true;
-  for (let i = 0, l = arr.length; i < length; i++) {
+  for (let i = 0, l = arr.length; i < l; i++) {
     let same = true;
     let keys1 = Object.keys(arr[i]);
     let keys2 = Object.keys(newEntry);
@@ -109,7 +109,7 @@ function generateEntriesWithDefaults(fonts: CollectedFonts) {
     fonts[key].entries.forEach((entry) => {
       let entryWithDefaults: { [key: string]: number } = {};
       fonts[key].tags.forEach((tag) => {
-        if (!entry[tag]) entryWithDefaults[tag] = DefaultValues[tag];
+        if (entry[tag] === undefined) entryWithDefaults[tag] = DefaultValues[tag];
         else entryWithDefaults[tag] = entry[tag];
       });
       pushUniqueEntry(fonts[key].entriesWithDefaults, entryWithDefaults);

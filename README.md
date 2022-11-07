@@ -17,6 +17,9 @@ npm i @tjmora/g-font
 
 ## Usage
 
+<details>
+  <summary>React</summary>
+
 ### Context
 
 First we create a context. Somewhere in your project, create a **gfont.ts** or **gfont.js** 
@@ -95,6 +98,72 @@ const SomeComponent = styled.div`
 `;
 ```
 
+</details>
+
+<details>
+  <summary>Angular</summary>
+
+### Context
+
+First we create a context. In the `src` folder, create a **gfont.ts** file.
+
+```typescript
+import GFont from "@tjmora/g-font";
+import { environment} from "./environments/environment";
+
+const g = new GFont(!environment.production);
+
+export default g;
+```
+
+> **_WARNING:_** The code above makes a distinction between development and production 
+> environments. The context behaves vastly different between these two environments. Read the 
+> section **Development vs Production** for more information.
+
+### In your something.component.ts file
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import g from "../../../gfont"; // let's import the context
+
+@Component({
+  selector: 'app-somethng',
+  templateUrl: './something.component.html',
+  styleUrls: ['./something.component.css']
+})
+export class SomethingComponent implements OnInit {
+
+  g = g; // context must exist in any instance of this class
+
+  // If a style applies to multiple elements, create a styling function
+  styleP = () => g.font("Roboto", "Arial, sans-serif").obj;
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+}
+```
+
+### In your something.component.html
+
+```html
+<h1 [ngStyle]="g.font('Roboto Flex', 'Verdana, sans-serif', 'semibold', 'slnt:-10', 'wdth:130.0').obj">
+  Some Headline
+</h1>
+<blockquote [ngStyle]="g.font('Lora', 'Georgia, serif', '500', 'italic').obj">
+  Some quote by Einstein.
+</blockquote>
+<p [ngStyle]="styleP()">
+  Some paragraph
+</p>
+<p [ngStyle]="styleP()">
+  Another Paragraph
+</p>
+```
+
+</details>
+
 ### `font` method parameters
 
 The `font` method takes the following arguments:
@@ -151,12 +220,9 @@ file/component (within  `<head>` or `<Head>` tags):
 
 3. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
-sure you're not refreshing the tab. You will notice the log console gets logged with objects 
-with properties `url` and `urlLength`. (For some static-generating frameworks like Next.js, you 
-will need to go to all the routes that has their own Google fonts so those fonts can 
-be collected. In Next.js, the `<Link>` anchor elements actually lead up to hydration, not new 
-page loads despite the route change in the address bar. The hydration makes the font collection 
-possible).
+sure you're not refreshing the tab. You also need to visit all the routes that has their own 
+fonts that needs to be collected. You will notice the log console gets logged with objects 
+with properties `url` and `urlLength`.
 
 4. Once you're confident all your needed fonts are already collected in the background, 
 look at the log console again. Normally if you didn't refresh the tab, the latest logged 
@@ -168,16 +234,13 @@ with it. You may also want to replace the `&display=block` part of the link with
 [Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 
 
-## Server-Rendering/Static Generation (e.g., Next.js)
+## SSG Frameworks (e.g., Next.js)
 
-The `font` method can distinguish between being rendered on the client-sie or being rendered on 
-the server-side. If server-rendered and the environment is development, the `font` method still 
-collects all the fonts and their weights, styles and variation settings, but it makes no 
-attempt in generating a stylesheet URL nor attempt to insert a stylesheet `<link>` tag to the 
-DOM on page load (But on hydration, such attempt is made).
-
-One thing you can do to solve this problem on page load is to include the stylesheet `<link>` 
-tag yourself. For example, here's how it should be done in Next.js:
+When the `font` method gets executed during the build process of SSGs (for the generation) of 
+static pages, the method behaves differently. It still collects all the fonts, weights, 
+styles and variation settings, but as it has no access to the DOM, it doesn't dynamically 
+insert any stylesheet `<link>` tag anywhere. You need to place the stylesheet `<link>` tag 
+yourself. For example, here's how it can be done in Next.js.
 
 In _app.tsx:
 

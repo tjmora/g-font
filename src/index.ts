@@ -357,6 +357,10 @@ export default class GFont {
       href += "&";
     }
     href += "display=block";
+    console.log({
+      url: href,
+      urlLength: href.length
+    });
     return href;
   }
 

@@ -22,7 +22,7 @@ First we create a context. Somewhere in your project, create a **gfont.ts** or *
 file.
 
 ```typescript
-import GFont from "@tjmora/g-font"; // for Typescript
+import GFont from "@tjmora/g-font" // for Typescript
 // const GFont = require("@tjmora/g-font").default; // for Javascript
 
 const g = new GFont(process.env.NODE_ENV === "development");
@@ -30,11 +30,9 @@ const g = new GFont(process.env.NODE_ENV === "development");
 export default g;
 ```
 
-Next, we import this context to our component.
-
-```typescript
-import g from "./gfont";
-```
+> **_WARNING:_** The code above makes a distinction between development and production 
+> environments. The context behaves vastly different between these two environments. Read the 
+> section **Development vs Production** for more information.
 
 ### Use in Inline Style Props
 
@@ -42,6 +40,8 @@ Use `font(...).obj` which returns an object of camelCased style props. Make sure
 spread the props using the `...` operator.
 
 ```tsx
+import g from "./gfont" // imports the context
+
 export default function SomeComponent () {
   return (
     <>
@@ -74,6 +74,7 @@ export default function SomeComponent () {
 Use `font(...).css` which returns a string of valid syntax of CSS rules.
 
 ```typescript
+import g from "./gfont" // imports the context
 import styled from "styled-components"
 
 const SomeComponent = styled.div`
@@ -105,7 +106,7 @@ The `font` method takes the following arguments:
 > **_TIP:_** In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on 
 > the name, weight or variation parameter to expose all the possible values for the parameter.
 
-> **_NOTE:_** The `font_` method (with trailing underscore) is the non-typed version of the 
+> **_TIP:_** The `font_` method (with trailing underscore) is the non-typed version of the 
 > `font` method. If you're sure you're using valid values but the `font` method keeps on 
 > putting red squiggly lines under those values or if Typescript fails to compile your values, 
 > try adding un underscore to the method you're using. 
@@ -145,19 +146,23 @@ generate it using Google Fonts' website. You can instead do the following:
 <link href="CHANGE_THIS" rel="stylesheet" />
 ```
 
+1. Start a development server for your website. In the browser, open the log console.
+
 2. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
-sure you're not refreshing the tab. (For some static-generating frameworks like Next.js, you 
+sure you're not refreshing the tab. You will notice the log console gets logged with objects 
+with properties `url` and `urlLength`. (For some static-generating frameworks like Next.js, you 
 will need to go to all the routes that has their own Google fonts so those fonts can 
-be collected. In Next.js, the `<Link>` elements actually lead up to hydration, not new page 
-loads despite the route change in the address bar. The hydration makes the font collection 
+be collected. In Next.js, the `<Link>` anchor elements actually lead up to hydration, not new 
+page loads despite the route change in the address bar. The hydration makes the font collection 
 possible).
 
-3. Once you're confident all your needed fonts are already collected in the background, 
-bring up the browser's inspection tool and look for the 
-`<link id="tjmora-g-font-..." rel="stylesheet" href="...">` tag within your document's head. 
-Copy the generated value inside the `href` attribute, and replace the `CHANGE_THIS` href value 
-from step no. 1 with it. You may want to replace the `&display=block` part of the link with 
+4. Once you're confident all your needed fonts are already collected in the background, 
+look at the log console again. Normally if you didn't refresh the tab, the latest logged 
+object (w/ props `url` and `urlLength`) would have the longest URL. Otherwise, you may need to 
+scroll up in the log console to look for the object with the longest `urlLength`. Copy the 
+value of `url` prop from that object and replace the `CHANGE_THIS` href value from step no. 1 
+with it. You may also want to replace the `&display=block` part of the link with 
 `&display=swap`.
 [Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 

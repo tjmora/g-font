@@ -34,7 +34,7 @@ export default g;
 > environments. The context behaves vastly different between these two environments. Read the 
 > section **Development vs Production** for more information.
 
-### Use in Inline Style Props
+### Within inline style props
 
 Use `font(...).obj` which returns an object of camelCased style props. Make sure to 
 spread the props using the `...` operator.
@@ -69,7 +69,7 @@ export default function SomeComponent () {
 }
 ```
 
-### Use in CSS-in-JS
+### Within CSS-in-JS
 
 Use `font(...).css` which returns a string of valid syntax of CSS rules.
 
@@ -100,7 +100,7 @@ The `font` method takes the following arguments:
 
 * **name** - The name of the font.
 * **fallback** - The fallback font in case the Google font doesn't load.
-* **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or string-numeric. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
+* **weight** - The weight of the font. Defaults to `"regular"` or `"400"` if not provided. The value can be semantic or numeric-string. Semantic values include `"thin"`, `"extralight"`, `"light"`, `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"extrabold"`, and `"black"`.
 * **variation** - An optional rest or variadic parameter. Takes the style and other variation settings for the font. Its value can be `"normal"` (for non-italic), or `"italic"`, or `"slnt:-5"` if the font has a slant axis, or `"wdth:120.0"` if the font has a width axis, or other variation settings possible for a font.
 
 > **_TIP:_** In VSCode, when coding with Typescript, hit `CTRL` + `SPACE` when the cursor is on 
@@ -108,37 +108,37 @@ The `font` method takes the following arguments:
 
 > **_TIP:_** The `font_` method (with trailing underscore) is the non-typed version of the 
 > `font` method. If you're sure you're using valid values but the `font` method keeps on 
-> putting red squiggly lines under those values or if Typescript fails to compile your values, 
-> try adding un underscore to the method you're using. 
+> putting red squiggly lines under those values (and fails to compile because of that), 
+> try adding un underscore to the method you're using. The problem may be due to the 
+> imperfections of the custom types.
 
 
 ## Development vs Production
 
-The `font` method is supposed to behave differently between the developmental and production 
+The `font` method is supposed to behave differently between the development and production 
 environments.
 
-In development, **true** is passed to `new GFont(...)`. The `font` method automatically 
-collects all the fonts and their weights, styles and variation settings, and automatically 
-inserts a stylesheet `<link>` tag with an automatically-generated href to the DOM. This will 
-allow you to quickly see how the different fonts you try get rendered by the browser. The 
-fonts load a bit slow, and they may flicker, at page load and at hydration. This slow 
-font-rendering behavior is really only tolerable in a developmental environment.
+In development, thehe `font` method automatically collects all the fonts and their weights, 
+styles and variation settings, and automatically inserts a stylesheet `<link>` tag with an 
+automatically-generated href to the DOM. This will allow you to quickly see how the different 
+fonts you try get rendered by the browser. The fonts load a bit slow and they may flicker 
+at page load and at hydration. This slow font-rendering behavior is really only tolerable 
+in a developmental environment.
 
-In production, **false** is passed to `new GFont(...)`. The `font` method still returns the 
-`.css` string of valid css syntax, and the `.obj` object of valid inline style prop values. 
-So you don't need to refactor those `font` method calls into native css or inline style props. 
-However, there will be no attempt in collecting the fonts and their weights, styles and 
-variation settings, and no attempt as well in dynamically inserting any stylesheet `<link>` 
-tag to the DOM. You are supposed to collect your final selection of fonts on your own and 
-then add all the necessary stylesheet `<link>` tags to your App or Document file/component. 
-This is the only pragmatic way of speeding up the load up times of your chosen fonts in 
-production.
+In production, the `font` method still returns the `.obj` object of valid inline style prop 
+values, and the `.css` string of valid css syntax. So you don't need to refactor those `font` 
+method calls into inline style props or native css strings. However, there will be no attempt 
+in collecting the fonts and their weights, styles and variation settings, and no attempt as 
+well in dynamically inserting any stylesheet `<link>` tag to the DOM. You are supposed to 
+collect your final selection of fonts on your own and then add all the necessary stylesheet 
+`<link>` tags to your app, document or layout file/component. This is the only pragmatic way 
+of speeding up the load up times of your chosen fonts in production.
 
 To generate the Google Fonts stylesheet URL that you need in production, you don't need to 
 generate it using Google Fonts' website. You can instead do the following:
 
-1. Place the following `link` tags somewhere in your app, document or layout file/component 
-(within  `<head>` or `<Head>` tags):
+1. Copy and paste the following `link` tags somewhere in your app, document or layout 
+file/component (within  `<head>` or `<Head>` tags):
 
 ```
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -146,9 +146,9 @@ generate it using Google Fonts' website. You can instead do the following:
 <link href="CHANGE_THIS" rel="stylesheet" />
 ```
 
-1. Start a development server for your website. In the browser, open the log console.
+2. Start a development server for your website. In the browser, open the log console.
 
-2. Do everything your website can in developmental mode, making sure all the 
+3. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
 sure you're not refreshing the tab. You will notice the log console gets logged with objects 
 with properties `url` and `urlLength`. (For some static-generating frameworks like Next.js, you 

@@ -408,11 +408,11 @@ export default class GFont {
       ${variationsToCss(variations)}
     `;
 
-    let obj = {
+    let obj: {[key: string]: any} = {
       fontFamily: "'" + name + "', " + fallback,
-      fontWeight: wght,
-      ...variationsToObj(variations),
-    };
+    }
+    if (weight) obj["fontWeight"] = wght;
+    obj = {...obj, ...variationsToObj(variations)};
 
     return {
       css: css,

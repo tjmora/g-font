@@ -259,10 +259,17 @@ export default class GFont {
 
   private isCollecting: boolean;
 
+  private isServerRendered: boolean;
+
   private latestLock = 1;
 
   constructor(cond: boolean) {
     this.isCollecting = cond;
+    this.isServerRendered =  !(
+      typeof window !== "undefined" &&
+      window.document &&
+      window.document.createElement
+    );
     this.linkTagId =
       // add random letters to our id
       "tjmora-g-font-" + (Math.random() + 1).toString(36).substring(7);
@@ -357,10 +364,12 @@ export default class GFont {
       href += "&";
     }
     href += "display=block";
-    console.log({
-      url: href,
-      urlLength: href.length
-    });
+    if (!this.isServerRendered) {
+      console.log({
+        url: href,
+        urlLength: href.length
+      });
+    }
     return href;
   }
 
@@ -380,13 +389,7 @@ export default class GFont {
     }
 
     if (this.isCollecting) {
-      const isServerRendered = !(
-        typeof window !== "undefined" &&
-        window.document &&
-        window.document.createElement
-      );
-
-      if (!isServerRendered && this.latestLock === 1)
+      if (!this.isServerRendered && this.latestLock === 1)
         // true only in very first call to gFont for client-rendered components
         insertLinkTag(this.linkTagId);
 
@@ -396,7 +399,7 @@ export default class GFont {
         variations
       );
 
-      if (!isServerRendered && collectorIsChanged) this.attemptProvideLink(8);
+      if (!this.isServerRendered && collectorIsChanged) this.attemptProvideLink(8);
     }
 
     const css = `

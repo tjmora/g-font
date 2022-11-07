@@ -228,7 +228,3 @@ variation settings but this library chose to ignore those axes.
 3. Some fonts from this [repo](https://github.com/google/fonts) have missing METADATA files. 
 Those fonts are not even present in the Google Fonts website so this library also chose to 
 ignore those fonts.
-
-## Test
-
-The test for this package is a [separate repo](https://github.com/tjmora/g-font-test).

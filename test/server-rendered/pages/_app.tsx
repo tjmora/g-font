@@ -5,6 +5,7 @@ import SectionSwitcher from '../components/SectionSwitcher'
 import G from "../gfont";
 
 export default function App({ Component, pageProps }: AppProps) {
+  console.log("process.node.NODE_ENV is " + process.env.NODE_ENV);
   return (
     <>
       <SectionSwitcher>

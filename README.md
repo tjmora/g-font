@@ -1,10 +1,11 @@
 # @tjmora/g-font
 
 This will help you try different Google Fonts without needing to generate stylesheet URLs 
-every time you change your fonts. The stylesheet URLs are automatically-generated while 
-on you're on a development environment (A little more steps are needed for production 
-environment). If used with Typescript, your code editor's code completion system can guide you 
-to valid font names, valid weights, valid styles and valid variation settings for each font.
+every time you change your fonts. The stylesheet URLs and tags are automatically-generated 
+and inserted to the DOM while you're on a development environment (A little more steps are 
+needed for production environment). If used with Typescript, your IDE's code completion system 
+can guide you to valid font names, valid weights, valid styles and valid variation settings 
+for each font.
 
 
 ## Installation

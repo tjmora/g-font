@@ -3,17 +3,19 @@
 **In development mode:**
 
 * Use the `g.font(...)` method to try different Google Fonts as much as you want without 
-needing to regenerate Google Font API URl over and over again.
+  needing to regenerate Google Font API URl over and over again.
+* You also don't need to import individual fonts. Just change the `g.font(...)` parameters 
+  to any font and style that you want. 
 * The stylesheet `<link>` tags with auto-generated href is dynamically inserted to the DOM.
 * If used with Typescript, invalid style values will be linted as erroneous. Use 
-`CTRL + SPACE` in VSCode to see all valid values.
+  `CTRL + SPACE` in VSCode to see all valid values.
 
 **In production mode:**
 
 All the things you can do in development mode, except:
 
 * The Google Fonts API URL is not auto-generated and no stylesheet `<link>` tag is inserted 
-the DOM. Check the **Production Steps** section for the additional steps you must do.
+  the DOM. Check the **Production Steps** section for the additional steps you must do.
 
 
 ## Installation

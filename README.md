@@ -30,7 +30,7 @@ npm i @tjmora/g-font
 <details>
 <summary><h3>Show usage in React</h3></summary>
 
-### Context
+#### Context
 
 First we create a context. Somewhere in your project, create a **gfont.ts** or **gfont.js** 
 file.
@@ -44,7 +44,7 @@ const g = new GFont(process.env.NODE_ENV === "development");
 export default g;
 ```
 
-### Within inline style props
+#### Within inline style props
 
 Use `font(...).obj` which returns an object of camelCased style props. Make sure to 
 spread the props using the `...` operator.
@@ -79,7 +79,7 @@ export default function SomeComponent () {
 }
 ```
 
-### Within CSS-in-JS
+#### Within CSS-in-JS
 
 Use `font(...).css` which returns a string of valid syntax of CSS rules.
 
@@ -104,7 +104,7 @@ const SomeComponent = styled.div`
 `;
 ```
 
-### Next.js
+#### Next.js
 
 Look for the **SSG** section below this document to know additional steps you need for Next.js.
 
@@ -113,7 +113,7 @@ Look for the **SSG** section below this document to know additional steps you ne
 <details>
 <summary><h3>Show usage in Angular</h3></summary>
 
-### Context
+#### Context
 
 First we create a context. In the `src` folder, create a **gfont.ts** file.
 
@@ -126,7 +126,7 @@ const g = new GFont(!environment.production);
 export default g;
 ```
 
-### In your .component.ts file
+#### In your .component.ts file
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -151,7 +151,7 @@ export class SomeComponent implements OnInit {
 }
 ```
 
-### In your .component.html
+#### In your .component.html
 
 The `.obj` at the end of the method is a return value of type `{[key: string]: string}`. 
 There's also a purely-string return type `.css` but it's only used in CSS-in-JS libraries.

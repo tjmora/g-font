@@ -28,7 +28,7 @@ npm i @tjmora/g-font
 ## Usage
 
 <details>
-<summary><h3>Show usage in React</h3></summary>
+<summary><h3>Show usage in React (or Next)</h3></summary>
 
 #### Context
 
@@ -104,9 +104,41 @@ const SomeComponent = styled.div`
 `;
 ```
 
-#### Next.js
+#### Additional steps for Next.js
 
-Look for the **SSG** section below this document to know additional steps you need for Next.js.
+When the `font` method gets executed during the build process of SSGs (for the generation) of 
+static pages, the method behaves differently. It still collects all the fonts, weights, 
+styles and variation settings, but as it has no access to the DOM, it doesn't dynamically 
+insert any stylesheet `<link>` tag anywhere. You need to place the stylesheet `<link>` tag 
+yourself:
+
+In **_app.tsx**:
+
+```tsx
+import '../styles/globals.css'
+import type { AppProps } from 'next/app'
+import Head from 'next/head'
+import g from '../gfont' // this is our context
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <Component {...pageProps} />
+      <Head>
+        <link rel="stylesheet" type="text/css" href={g.buildLink()} />
+      </Head>
+    </>
+  )
+}
+```
+
+The `buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
+weights and styles) collected so far. You don't need to worry about hydration because the 
+`font` method will work as expected when it has access to the DOM.
+
+> **_WARNING:_** The `buildLink()` must execute only after all other components of your app 
+> is already included. That's why we placed the `<Head>` and `<link>` tags after the 
+> `<Component>` tag in the example code above.
 
 </details>
 
@@ -226,45 +258,3 @@ browser's console. Change the `CHANGE_THIS` href value from step no. 1 into what
 copied. You may also want to replace the `&display=block` part of the link with 
 `&display=swap`.
 [Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
-
-
-## SSG Frameworks (e.g., Next.js)
-
-When the `font` method gets executed during the build process of SSGs (for the generation) of 
-static pages, the method behaves differently. It still collects all the fonts, weights, 
-styles and variation settings, but as it has no access to the DOM, it doesn't dynamically 
-insert any stylesheet `<link>` tag anywhere. You need to place the stylesheet `<link>` tag 
-yourself. For example, here's how it can be done in Next.js.
-
-In _app.tsx:
-
-```tsx
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
-import Head from 'next/head'
-import g from '../gfont' // this is our context
-
-export default function App({ Component, pageProps }: AppProps) {
-  return (
-    <>
-      <Component {...pageProps} />
-      <Head>
-        <link rel="stylesheet" type="text/css" href={g.buildLink()} />
-      </Head>
-    </>
-  )
-}
-```
-
-The `buildLink()` will build a Google Font stylesheet link of all the fonts (and their 
-weights and styles) collected so far.
-
-> **_WARNING:_** The `buildLink()` must execute only after all other components of your app 
-> is already included. That's why we placed the `<Head>` and `<link>` tags after the 
-> `<Component>` tag in the example code above.
-
-This manually-added `<link>` tag is only important for the page loads. For hydration, the 
-`font` method works as expected. In development, it collects fonts, weights, styles and 
-variation settings, and dynamically inserts a stylesheet `<link>` tag to the DOM. In production, 
-it doesn't do the collecting and the dynamic insertion of `<link>` tags. You need to place the 
-necessary `<link>` tags yourself as discussed previously in the **Production Steps** section.

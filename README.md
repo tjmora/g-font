@@ -1,11 +1,19 @@
 # @tjmora/g-font
 
-This will help you try different Google Fonts without needing to generate stylesheet URLs 
-every time you change your fonts. The stylesheet URLs and tags are automatically-generated 
-and inserted to the DOM while you're on a development environment (A little more steps are 
-needed for production environment). If used with Typescript, your IDE's code completion system 
-can guide you to valid font names, valid weights, valid styles and valid variation settings 
-for each font.
+**In development mode:**
+
+* Use the `g.font(...)` method to try different Google Fonts as much as you want without 
+needing to regenerate Google Font API URl over and over again.
+* The stylesheet `<link>` tags with auto-generated href is dynamically inserted to the DOM.
+* If used with Typescript, invalid style values will be linted as erroneous. Use 
+`CTRL + SPACE` in VSCode to see all valid values.
+
+**In production mode:**
+
+All the things you can do in development mode, except:
+
+* The Google Fonts API URL is not auto-generated and no stylesheet `<link>` tag is inserted 
+the DOM. Check the **Production Steps** section for the additional steps you must do.
 
 
 ## Installation
@@ -33,10 +41,6 @@ const g = new GFont(process.env.NODE_ENV === "development");
 
 export default g;
 ```
-
-> **_WARNING:_** The code above makes a distinction between development and production 
-> environments. The context behaves vastly different between these two environments. Read the 
-> section **Development vs Production** for more information.
 
 ### Within inline style props
 
@@ -120,10 +124,6 @@ const g = new GFont(!environment.production);
 export default g;
 ```
 
-> **_WARNING:_** The code above makes a distinction between development and production 
-> environments. The context behaves vastly different between these two environments. Read the 
-> section **Development vs Production** for more information.
-
 ### In your .component.ts file
 
 ```typescript
@@ -190,29 +190,16 @@ The `font` method takes the following arguments:
 > imperfections of the custom types.
 
 
-## Development vs Production
+## Production Steps
 
-The `font` method is supposed to behave differently between the development and production 
-environments.
+The auto-generation of Google Fonts API URL and the dynamic insertion of stylesheet `<link>` 
+tags to the DOM only happen in development mode. The mechanism employed here results to slow 
+font downloads that you may see your fonts flicker every page load or hydration, something 
+that is tolerable only in development mode.
 
-In development, thehe `font` method automatically collects all the fonts and their weights, 
-styles and variation settings, and automatically inserts a stylesheet `<link>` tag with an 
-automatically-generated href to the DOM. This will allow you to quickly see how the different 
-fonts you try get rendered by the browser. The fonts load a bit slow and they may flicker 
-at page load and at hydration. This slow font-rendering behavior is really only tolerable 
-in a developmental environment.
-
-In production, the `font` method still returns the `.obj` object of valid inline style prop 
-values, and the `.css` string of valid css syntax. So you don't need to refactor those `font` 
-method calls into inline style props or native css strings. However, there will be no attempt 
-in collecting the fonts and their weights, styles and variation settings, and no attempt as 
-well in dynamically inserting any stylesheet `<link>` tag to the DOM. You are supposed to 
-collect your final selection of fonts on your own and then add all the necessary stylesheet 
-`<link>` tags to your app, document or layout file/component. This is the only pragmatic way 
-of speeding up the load up times of your chosen fonts in production.
-
-To generate the Google Fonts stylesheet URL that you need in production, you don't need to 
-generate it using Google Fonts' website. You can instead do the following:
+The fonts need to be downloaded or preloaded when in production mode. You need to include the 
+Google Fonts API URL of the final selection of fonts you decided upon. Fortunately, you don't 
+need to generate that URL through the Google Fonts' website. Simply do the following:
 
 1. Copy and paste the following `link` tags somewhere in your app, document or layout 
 file/component (within  `<head>` or `<Head>` tags):
@@ -228,15 +215,13 @@ file/component (within  `<head>` or `<Head>` tags):
 3. Do everything your website can in developmental mode, making sure all the 
 hydration events lead up to the collection of all the fonts your website needs, and making 
 sure you're not refreshing the tab. You also need to visit all the routes that has their own 
-fonts that needs to be collected. You will notice the log console gets logged with objects 
-with properties `url` and `urlLength`.
+fonts that needs to be collected. You will notice the log console gets logged with Google Font 
+API URLs.
 
 4. Once you're confident all your needed fonts are already collected in the background, 
-look at the log console again. Normally if you didn't refresh the tab, the latest logged 
-object (w/ props `url` and `urlLength`) would have the longest URL. Otherwise, you may need to 
-scroll up in the log console to look for the object with the longest `urlLength`. Copy the 
-value of `url` prop from that object and replace the `CHANGE_THIS` href value from step no. 1 
-with it. You may also want to replace the `&display=block` part of the link with 
+look at the log console again. Copy the latest (or longest) Google Font API URL from the 
+browser's console. Change the `CHANGE_THIS` href value from step no. 1 into what you just 
+copied. You may also want to replace the `&display=block` part of the link with 
 `&display=swap`.
 [Check this out to learn more about block vs swap](https://developer.chrome.com/blog/font-display/#font-download-timelines).
 
@@ -282,20 +267,3 @@ variation settings, and dynamically inserts a stylesheet `<link>` tag to the DOM
 it doesn't do the collecting and the dynamic insertion of `<link>` tags. You need to place the 
 necessary `<link>` tags yourself as discussed previously in the later part of the 
 **Development vs Production** section.
-
-
-## Issues/Contributing
-
-Before you create any issue or make a pull request, please consider the following:
-
-1. The weight parameter for the `font` and `font_` will only be of type string for the 
-meantime, even for the numeric values. This makes the custom font/value types simpler and 
-the code editor will have easier time generating the set of valid values.
-
-2. Only the variation settings or axes included [here](https://fonts.google.com/variablefonts#axis-definitions) 
-are supported as these have documented default values. A few Google fonts have exotic 
-variation settings but this library chose to ignore those axes.
-
-3. Some fonts from this [repo](https://github.com/google/fonts) have missing METADATA files. 
-Those fonts are not even present in the Google Fonts website so this library also chose to 
-ignore those fonts.

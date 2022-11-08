@@ -365,10 +365,7 @@ export default class GFont {
     }
     href += "display=block";
     if (!this.isServerRendered) {
-      console.log({
-        url: href,
-        urlLength: href.length
-      });
+      console.log("Google Font API URL: " + href);
     }
     return href;
   }

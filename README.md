@@ -18,7 +18,7 @@ npm i @tjmora/g-font
 ## Usage
 
 <details>
-  <summary>React</summary>
+<summary><h3>Show usage in React</h3></summary>
 
 ### Context
 
@@ -98,10 +98,14 @@ const SomeComponent = styled.div`
 `;
 ```
 
+### Next.js
+
+Look for the **SSG** section below this document to know additional steps you need for Next.js.
+
 </details>
 
 <details>
-  <summary>Angular</summary>
+<summary><h3>Show usage in Angular</h3></summary>
 
 ### Context
 
@@ -120,20 +124,20 @@ export default g;
 > environments. The context behaves vastly different between these two environments. Read the 
 > section **Development vs Production** for more information.
 
-### In your something.component.ts file
+### In your .component.ts file
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
 import g from "../../../gfont"; // let's import the context
 
 @Component({
-  selector: 'app-somethng',
-  templateUrl: './something.component.html',
-  styleUrls: ['./something.component.css']
+  selector: 'app-some',
+  templateUrl: './some.component.html',
+  styleUrls: ['./some.component.css']
 })
-export class SomethingComponent implements OnInit {
+export class SomeComponent implements OnInit {
 
-  g = g; // context must exist in any instance of this class
+  g = g; // Just copy the context here
 
   // If a style applies to multiple elements, create a styling function
   styleP = () => g.font("Roboto", "Arial, sans-serif").obj;
@@ -145,7 +149,10 @@ export class SomethingComponent implements OnInit {
 }
 ```
 
-### In your something.component.html
+### In your .component.html
+
+The `.obj` at the end of the method is a return value of type `{[key: string]: string}`. 
+There's also a purely-string return type `.css` but it's only used in CSS-in-JS libraries.
 
 ```html
 <h1 [ngStyle]="g.font('Roboto Flex', 'Verdana, sans-serif', 'semibold', 'slnt:-10', 'wdth:130.0').obj">

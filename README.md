@@ -267,5 +267,4 @@ This manually-added `<link>` tag is only important for the page loads. For hydra
 `font` method works as expected. In development, it collects fonts, weights, styles and 
 variation settings, and dynamically inserts a stylesheet `<link>` tag to the DOM. In production, 
 it doesn't do the collecting and the dynamic insertion of `<link>` tags. You need to place the 
-necessary `<link>` tags yourself as discussed previously in the later part of the 
-**Development vs Production** section.
+necessary `<link>` tags yourself as discussed previously in the **Production Steps** section.
